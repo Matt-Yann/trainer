@@ -138,19 +138,56 @@
 
   /* ---------- exercise card ---------- */
   .group{margin-top:18px}
-  .ghead{display:flex;align-items:center;gap:8px;margin:0 4px 8px;flex-wrap:wrap}
+  .ghead{display:flex;align-items:baseline;gap:10px;margin:2px 4px 10px}
   .group h2{
-    font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--muted);margin:0;flex:1;min-width:0;
+    font-size:19px;font-weight:750;letter-spacing:-0.02em;text-transform:none;
+    color:var(--ink);margin:0;flex:1;min-width:0;line-height:1.15;
   }
-  .gtime{font-size:12px;font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .group h2 small{
+    display:block;font-size:11.5px;font-weight:600;letter-spacing:0;
+    color:var(--muted);margin-top:3px;
+  }
+  .gtime{font-size:17px;font-weight:750;color:var(--ink-2);font-variant-numeric:tabular-nums;
+    letter-spacing:-0.02em;flex:0 0 auto}
   .gtime.on{color:var(--series-1)}
   .gtime.fin{color:var(--good)}
-  .gbtn{
-    font:inherit;font-size:11px;font-weight:700;letter-spacing:.02em;
-    border:1px solid var(--series-1);color:var(--series-1);background:transparent;
-    border-radius:999px;padding:5px 11px;cursor:pointer;flex:0 0 auto;
+  .gfin{
+    display:block;width:100%;font:inherit;font-size:16px;font-weight:700;letter-spacing:-0.01em;
+    border:2px solid var(--series-1);color:var(--series-1);background:transparent;
+    border-radius:14px;padding:15px 12px;cursor:pointer;margin:2px 0 4px;text-align:center;
   }
+  .gfin:active{background:color-mix(in srgb, var(--series-1) 14%, transparent)}
+  .gfin-done{
+    border-color:var(--good);color:var(--good);cursor:default;
+    background:color-mix(in srgb, var(--good) 8%, transparent);font-size:15px;
+  }
+
+  /* day-of-week selector */
+  .dayseg{display:flex;gap:6px;margin:12px 0 0}
+  .dayseg button{
+    flex:1;padding:11px 4px;border-radius:12px;border:1px solid var(--line);
+    background:var(--surface);color:var(--ink-2);font:inherit;font-size:14px;font-weight:650;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .dayseg button[aria-pressed="true"]{background:var(--ink);color:var(--plane);border-color:var(--ink)}
+  .dayseg i{width:7px;height:7px;border-radius:999px;background:var(--series-1);display:block}
+  .dayseg i.ok{background:var(--good)}
+  .dayseg button[aria-pressed="true"] i{box-shadow:0 0 0 1.5px var(--plane)}
+
+  /* the three-day history strip under each exercise */
+  .dayhist{display:flex;gap:5px;margin:9px 0 0}
+  .dh{
+    flex:1;min-width:0;font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);
+    background:var(--surface-2);border:1px solid transparent;border-radius:9px;
+    padding:5px 4px 6px;text-align:center;line-height:1.15;
+  }
+  .dh b{display:block;font-size:9.5px;font-weight:700;letter-spacing:.06em;
+    color:var(--muted);margin:0 0 2px}
+  .dh.has{color:var(--ink);font-weight:650}
+  .dh .x{opacity:.45;margin:0 1px;font-weight:400}
+  .dh.cur{border-color:color-mix(in srgb, var(--series-1) 55%, transparent);
+    background:color-mix(in srgb, var(--series-1) 8%, var(--surface-2))}
+  .dh.cur b{color:var(--series-1)}
 
   /* ---------- timers ---------- */
   .timerbar{
@@ -309,7 +346,17 @@
     background-repeat:no-repeat;background-position:right 10px center;
   }
   .pfield input:focus,.pfield select:focus{outline:none;border-color:var(--series-1)}
-  .daylist{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px}
+  .daylist{display:flex;flex-direction:column;gap:6px;margin:12px 0 2px}
+  .dayrow{
+    display:flex;align-items:baseline;gap:10px;font-size:13px;color:var(--muted);
+    background:var(--surface-2);border:1px solid transparent;border-radius:10px;padding:9px 11px;
+    font-variant-numeric:tabular-nums;
+  }
+  .dayrow b{font-weight:700;color:var(--ink-2);flex:0 0 auto}
+  .dayrow span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dayrow em{font-style:normal;font-weight:700}
+  .dayrow em.ok{color:var(--good)}
+  .dayrow.on{border-color:color-mix(in srgb, var(--good) 40%, transparent);color:var(--ink-2)}
   .daychip{
     font:inherit;font-size:12px;font-weight:600;border-radius:999px;padding:6px 12px;cursor:pointer;
     border:1px solid var(--good);background:color-mix(in srgb, var(--good) 10%, transparent);
@@ -385,6 +432,7 @@
       Download the file and open it in your browser (or add it to your home screen) instead.
     </p>
     <div class="chips" id="dayChips"></div>
+    <div class="dayseg" id="daySeg"></div>
 
     <div class="timerbar" id="timerBar">
       <div class="tmain">
@@ -392,6 +440,7 @@
         <b class="tval" id="tGlobal">0:00</b>
       </div>
       <button class="tbtn" id="tToggle">Empezar</button>
+      <button class="tsmall hidden" id="tEnd" aria-label="Terminar sesión" title="Terminar sesión">⏹</button>
       <button class="tsmall" id="tReset" aria-label="Reiniciar cronómetro">↺</button>
     </div>
 
@@ -430,10 +479,10 @@
 
     <div class="panel">
       <h3>Days trained</h3>
-      <p class="sub">Marked automatically once the chronometer passes 1 minute.</p>
+      <p class="sub">Three slots per week. A day counts once you log a set or run the chronometer.</p>
       <svg class="chart" id="daysChart" viewBox="0 0 320 150" role="img" aria-label="Days trained per week"></svg>
       <div id="dayList" class="daylist"></div>
-      <button class="toggletbl marktoday" id="markToday">+ Marcar hoy</button>
+      <button class="toggletbl marktoday" id="markToday">+ Marcar hoy en Día actual</button>
     </div>
 
     <div class="panel">
@@ -450,7 +499,7 @@
 
     <div class="panel">
       <h3>Progress per exercise</h3>
-      <p class="sub">Working weight across the four weeks.</p>
+      <p class="sub">Working weight across all 12 sessions (4 weeks × 3 days).</p>
       <select id="exSel" aria-label="Select exercise"></select>
       <svg class="chart" id="exChart" viewBox="0 0 320 180" role="img" aria-label="Weight per week"></svg>
       <button class="toggletbl" data-tbl="exTable">Show numbers</button>
@@ -615,12 +664,33 @@ const store = {
     try{ localStorage.setItem(KEY, JSON.stringify(v)); }catch(e){}
   }
 };
-const blank = () => ({week:1, unit:"kg", day:"all", theme:"auto", log:{}, tm:{},
-                      body:{kg:70, met:5}});
-let S = Object.assign(blank(), store.read() || {});
+const SESS = ["1","2","3"];                 // three training days inside each week
+const blank = () => ({v:2, week:1, sess:"1", unit:"kg", day:"all", theme:"auto",
+                      log:{}, tm:{}, body:{kg:70, met:5}});
+const RAW = store.read() || {};
+let S = Object.assign(blank(), RAW);
 if(!S.log) S.log = {};
 if(!S.tm)  S.tm  = {};
 if(!S.body) S.body = {kg:70, met:5};
+if(!S.sess || SESS.indexOf(S.sess) === -1) S.sess = "1";
+
+/* v1 -> v2 migration: one entry per week becomes one entry per day, and the
+   old week data lands on day 1 so nothing already logged is lost. */
+if(RAW.v !== 2 && Object.keys(RAW).length){
+  const ol = S.log || {}, ot = S.tm || {}, nl = {}, nt = {};
+  [1,2,3,4].forEach(w=>{
+    if(ol[w] && Object.keys(ol[w]).length) nl[w] = {"1": ol[w]};
+    if(ot[w]){
+      const t = ot[w];
+      if(t.days && t.days.length) t.date = t.days[0];
+      delete t.days;
+      nt[w] = {"1": t};
+    }
+  });
+  S.log = nl; S.tm = nt; S.v = 2;
+  store.write(S);
+}
+S.v = 2;
 const save = () => store.write(S);
 
 /* --- body weight & energy expenditure ---------------------------------
@@ -648,14 +718,18 @@ const dayLabel = (iso) => {
   return `${wd} ${d}/${m}`;
 };
 
-const cell = (w, id) => (S.log[w] && S.log[w][id]) || {};
-function setCell(w, id, field, val){
+const dayRec = (w, d) => (S.log[w] && S.log[w][d]) || {};
+const cell = (w, d, id) => dayRec(w, d)[id] || {};
+function setCell(w, d, id, field, val){
   S.log[w] = S.log[w] || {};
-  S.log[w][id] = S.log[w][id] || {};
-  if(val === "" || val === null || isNaN(val)) delete S.log[w][id][field];
-  else S.log[w][id][field] = val;
+  S.log[w][d] = S.log[w][d] || {};
+  S.log[w][d][id] = S.log[w][d][id] || {};
+  if(val === "" || val === null || isNaN(val)) delete S.log[w][d][id][field];
+  else S.log[w][d][id][field] = val;
   save();
 }
+const dayHasData = (w, d) => Object.keys(dayRec(w, d))
+  .some(k => { const c = dayRec(w, d)[k]; return c && (c.w != null || c.r != null); });
 const vol = (c) => (c.w && c.r) ? c.w * c.r : 0;
 const fmt = (n) => {
   if(!isFinite(n)) return "0";
@@ -671,27 +745,31 @@ const REST_MS = 120000;                       // 2 minutes between blocks
 
 const freshTimer = () => ({
   run:false, last:null, el:0,                 // running? / last tick / session elapsed
-  bl:{}, done:[], act:GROUPS[0].id, rest:0, over:false
+  bl:{}, done:[], act:GROUPS[0].id, rest:0, over:false, date:null
 });
-function TM(){
-  const w = S.week;
-  if(!S.tm[w]) S.tm[w] = freshTimer();
-  const t = S.tm[w];
+function TM(w, d){
+  w = w || S.week; d = d || S.sess;
+  if(!S.tm[w]) S.tm[w] = {};
+  if(!S.tm[w][d]) S.tm[w][d] = freshTimer();
+  const t = S.tm[w][d];
   if(!t.bl) t.bl = {};
   if(!t.done) t.done = [];
-  if(!t.days) t.days = [];
   return t;
 }
+const TMraw = (w, d) => (S.tm[w] && S.tm[w][d]) || null;
 function markToday(){
-  const t = TM(), d = today();
-  if(t.days.indexOf(d) === -1){ t.days.push(d); t.days.sort(); save(); return true; }
+  const t = TM();
+  if(!t.date){ t.date = today(); save(); return true; }
   return false;
 }
-function toggleDay(iso){
-  const t = TM(), i = t.days.indexOf(iso);
-  if(i === -1) t.days.push(iso); else t.days.splice(i,1);
-  t.days.sort(); save(); renderStats();
+/* a day slot counts as trained once it has a date, a timer or logged sets */
+function dayTrained(w, d){
+  const t = TMraw(w, d);
+  return !!((t && (t.date || t.el > 0)) || dayHasData(w, d));
 }
+const weekDays  = (w) => SESS.filter(d => dayTrained(w, d)).length;
+const weekTime  = (w) => SESS.reduce((n,d)=> n + ((TMraw(w,d) && TMraw(w,d).el) || 0), 0);
+const weekBlock = (w,g) => SESS.reduce((n,d)=> n + (((TMraw(w,d) || {}).bl || {})[g] || 0), 0);
 const clock = (ms) => {
   ms = Math.max(0, Math.round(ms/1000));
   const h = Math.floor(ms/3600), m = Math.floor(ms%3600/60), s = ms%60;
@@ -737,7 +815,7 @@ function tick(){
     // long gap (app closed / phone asleep for 20 min+) → pause instead of
     // silently swallowing hours of wall-clock into the session
     if(dt < 0) dt = 0;
-    if(dt > 1200000){ dt = 0; t.run = false; t.last = null; save(); renderList(); }
+    if(dt > 1200000){ dt = 0; t.run = false; t.last = null; save(); renderDaySeg(); renderList(); }
     t.last = now;
     t.el += dt;
     if(t.rest > 0){
@@ -769,6 +847,7 @@ function restOver(){
 function finishBlock(id){
   const t = TM();
   markToday();
+  if(!t.run && t.el === 0){ t.run = true; t.last = Date.now(); }
   if(t.done.indexOf(id) === -1) t.done.push(id);
   const next = GROUPS.map(g=>g.id).filter(g => t.done.indexOf(g) === -1)[0] || null;
   t.act = next;
@@ -778,50 +857,79 @@ function finishBlock(id){
     t.rest = 0; t.run = false; t.over = true;
     beep(4); buzz([300,120,300,120,500]);
   }
-  save(); renderList(); paintTimers();
+  save(); renderDaySeg(); renderList(); paintTimers();
 }
 
 function toggleTimer(){
   const t = TM();
   unlockAudio();
-  if(t.over){ return; }
+  if(t.over){                       // session already closed -> offer a fresh one
+    ask("Nueva sesión",
+        "Empieza de cero el cronómetro y los bloques del Día " + S.sess +
+        " (Week " + S.week + "). Los pesos y las repeticiones no se tocan.",
+        "Empezar de nuevo")
+    .then(yes=>{ if(yes) resetSession(true); });
+    return;
+  }
   t.run = !t.run;
   t.last = t.run ? Date.now() : null;
   save(); renderList(); paintTimers();
 }
-function resetTimer(){
-  ask("Reiniciar cronómetro",
-      "Pone a cero el tiempo de sesión, los tiempos por bloque y los bloques terminados de la Week " +
-      S.week + ". Los pesos, las repeticiones y los días entrenados no se tocan.",
-      "Reiniciar")
+function endSession(){
+  const t = TM();
+  ask("Terminar sesión",
+      "Cierra la sesión del Día " + S.sess + " y para el cronómetro en " + clock(t.el) + ".",
+      "Terminar")
   .then(yes=>{
     if(!yes) return;
-    const days = TM().days.slice();          // keep the training-day history
-    S.tm[S.week] = freshTimer();
-    S.tm[S.week].days = days;
+    t.run = false; t.last = null; t.rest = 0; t.over = true;
+    markToday();
+    beep(2); buzz([260,110,260]);
     save(); renderList(); paintTimers();
     if(!$("#viewStats").classList.contains("hidden")) renderStats();
   });
+}
+function resetSession(keepDate){
+  const old = TM();
+  const date = keepDate ? old.date : null;
+  S.tm[S.week][S.sess] = freshTimer();
+  S.tm[S.week][S.sess].date = date;
+  save(); renderList(); paintTimers();
+  if(!$("#viewStats").classList.contains("hidden")) renderStats();
+}
+function resetTimer(){
+  ask("Reiniciar cronómetro",
+      "Pone a cero el tiempo, los tiempos por bloque y los bloques terminados del Día " +
+      S.sess + " (Week " + S.week + "). Los pesos y las repeticiones no se tocan.",
+      "Reiniciar")
+  .then(yes=>{ if(yes) resetSession(true); });
 }
 
 function paintTimers(){
   const t = TM();
   const bar = $("#timerBar");
-  $("#tLabel").textContent = t.over ? "Sesión completada · Week " + S.week : "Sesión · Week " + S.week;
+  $("#tLabel").textContent = (t.over ? "Sesión completada · " : "Sesión · ")
+    + "Week " + S.week + " · Día " + S.sess;
   $("#tGlobal").textContent = clock(t.el);
   bar.classList.toggle("live", t.run && t.rest <= 0);
   const btn = $("#tToggle");
-  btn.textContent = t.over ? "Hecho" : t.run ? "Pausa" : (t.el > 0 ? "Seguir" : "Empezar");
-  btn.classList.toggle("ghost", t.run || t.over);
-  btn.disabled = !!t.over;
+  btn.textContent = t.over ? "Nueva sesión" : t.run ? "Pausa" : (t.el > 0 ? "Seguir" : "Empezar");
+  btn.classList.toggle("ghost", t.run);
+  btn.disabled = false;
+  $("#tEnd").classList.toggle("hidden", t.over || (!t.run && t.el === 0));
 
   GROUPS.forEach(g=>{
     const sp = document.getElementById("gt-" + g.id);
-    if(!sp) return;
-    const fin = t.done.indexOf(g.id) !== -1;
-    sp.textContent = (fin ? "✓ " : "") + clock(t.bl[g.id] || 0);
-    sp.classList.toggle("fin", fin);
-    sp.classList.toggle("on", !fin && g.id === t.act && t.run && t.rest <= 0);
+    if(sp){
+      const fin = t.done.indexOf(g.id) !== -1;
+      sp.textContent = (fin ? "✓ " : "") + clock(t.bl[g.id] || 0);
+      sp.classList.toggle("fin", fin);
+      sp.classList.toggle("on", !fin && g.id === t.act && t.run && t.rest <= 0);
+    }
+    const fb = document.getElementById("gf-" + g.id);
+    if(fb && fb.classList.contains("gfin-done")){
+      fb.textContent = "✓ Bloque terminado · " + clock(t.bl[g.id] || 0);
+    }
   });
 
   const sheet = $("#restSheet");
@@ -840,6 +948,7 @@ function paintTimers(){
 
 $("#tToggle").addEventListener("click", toggleTimer);
 $("#tReset").addEventListener("click", resetTimer);
+$("#tEnd").addEventListener("click", endSession);
 $("#rSkip").addEventListener("click", ()=>{
   const t = TM(); t.rest = 0;
   $("#restSheet").classList.remove("done");
@@ -865,32 +974,59 @@ function renderChips(){
   });
 }
 
+function renderDaySeg(){
+  const box = $("#daySeg");
+  box.innerHTML = SESS.map(d=>{
+    const t = TMraw(S.week, d);
+    const mark = dayTrained(S.week, d)
+      ? `<i class="${t && t.over ? "ok" : "part"}"></i>` : "";
+    return `<button data-sess="${d}" aria-pressed="${S.sess===d}">Día ${d}${mark}</button>`;
+  }).join("");
+  box.querySelectorAll("[data-sess]").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      if(b.dataset.sess === S.sess) return;
+      tick();                                  // settle the day we are leaving
+      const prev = TM(); prev.run = false; prev.last = null;
+      S.sess = b.dataset.sess;
+      const nt = TM(); nt.run = false; nt.last = null;
+      save(); renderDaySeg(); renderList();
+      if(!$("#viewStats").classList.contains("hidden")) renderStats();
+    });
+  });
+}
+
+/* the little "D1 100×10 · D2 … · D3 …" strip under every exercise */
+function dayStrip(w, id){
+  return `<div class="dayhist">` + SESS.map(d=>{
+    const c = cell(w, d, id);
+    const has = c.w != null && c.r != null;
+    const txt = has ? `${c.w}<span class="x">×</span>${c.r}`
+                    : (c.w != null ? `${c.w}` : "—");
+    return `<span class="dh${d===S.sess?" cur":""}${has?" has":""}">` +
+           `<b>D${d}</b>${txt}</span>`;
+  }).join("") + `</div>`;
+}
+
 function renderList(){
-  const w = S.week;
+  const w = S.week, ses = S.sess;
   const shown = EX.filter(e => S.day==="all" || e.g===S.day);
+  const t = TM();
   let html = "";
   GROUPS.forEach(g=>{
     const items = shown.filter(e => e.g===g.id);
     if(!items.length) return;
-    const t = TM();
     const fin = t.done.indexOf(g.id) !== -1;
-    const canFinish = !fin && g.id === t.act && (t.run || t.el > 0);
-    html += `<div class="group"><div class="ghead"><h2>${g.name}</h2>` +
-      `<span class="gtime" id="gt-${g.id}">${clock(t.bl[g.id] || 0)}</span>` +
-      (canFinish ? `<button class="gbtn" data-fin="${g.id}">Terminar bloque</button>` : "") +
-      `</div>`;
+    html += `<div class="group"><div class="ghead">` +
+      `<h2>${g.short}<small>${g.name.split(" · ")[1]}</small></h2>` +
+      `<span class="gtime" id="gt-${g.id}">${clock(t.bl[g.id] || 0)}</span></div>`;
     items.forEach((e, i)=>{
-      const c = cell(w, e.id);
-      const prevC = w > 1 ? cell(w-1, e.id) : null;
+      const c = cell(w, ses, e.id);
       const done = c.w != null && c.r != null;
-      const blockDone = fin;                       // whole block signed off
-      const prevTxt = (prevC && prevC.w != null && prevC.r != null)
-        ? `<p class="prev">Week ${w-1}: <b>${prevC.w} ${S.unit} × ${prevC.r}</b></p>` : "";
       html += `
-      <div class="card${done?" done":""}${blockDone?" blockdone":""}" data-card="${e.id}">
+      <div class="card${done?" done":""}${fin?" blockdone":""}" data-card="${e.id}">
         <div class="thumb">${thumb(e.a, e.n, i)}</div>
         <div class="meta">
-          <p class="name">${blockDone?'<span class="cdone">✓</span>':""}${e.n} <span class="en">${e.e}</span></p>
+          <p class="name">${fin?'<span class="cdone">✓</span>':""}${e.n} <span class="en">${e.e}</span></p>
           <p class="presc"><em>${e.s}</em> · ${e.m}</p>
           <div class="fields">
             <div class="field">
@@ -904,10 +1040,15 @@ function renderList(){
                      placeholder="—" value="${c.r != null ? c.r : ""}" data-ex="${e.id}" data-f="r">
             </div>
           </div>
-          ${prevTxt}
+          ${dayStrip(w, e.id)}
         </div>
       </div>`;
     });
+    if(fin){
+      html += `<div class="gfin gfin-done" id="gf-${g.id}">✓ Bloque terminado · ${clock(t.bl[g.id] || 0)}</div>`;
+    } else if(g.id === t.act && !t.over){
+      html += `<button class="gfin" id="gf-${g.id}" data-fin="${g.id}">Terminar ${g.short}</button>`;
+    }
     html += `</div>`;
   });
   listEl.innerHTML = html;
@@ -915,11 +1056,13 @@ function renderList(){
   listEl.querySelectorAll("input").forEach(inp=>{
     inp.addEventListener("input", ()=>{
       const v = inp.value === "" ? "" : parseFloat(inp.value);
-      setCell(S.week, inp.dataset.ex, inp.dataset.f, v);
+      setCell(S.week, S.sess, inp.dataset.ex, inp.dataset.f, v);
       const card = inp.closest(".card");
-      const c = cell(S.week, inp.dataset.ex);
+      const c = cell(S.week, S.sess, inp.dataset.ex);
       card.classList.toggle("done", c.w != null && c.r != null);
-      updateProgress();
+      const strip = card.querySelector(".dayhist");
+      if(strip) strip.outerHTML = dayStrip(S.week, inp.dataset.ex);
+      updateProgress(); renderDaySeg();
     });
   });
   listEl.querySelectorAll("[data-fin]").forEach(b=>{
@@ -931,9 +1074,11 @@ function renderList(){
 
 function updateProgress(){
   const total = EX.length;
-  const done = EX.filter(e=>{ const c = cell(S.week, e.id); return c.w != null && c.r != null; }).length;
+  const done = EX.filter(e=>{
+    const c = cell(S.week, S.sess, e.id); return c.w != null && c.r != null;
+  }).length;
   $("#progFill").style.width = (done/total*100).toFixed(1)+"%";
-  $("#progTxt").textContent = `${done} / ${total} logged`;
+  $("#progTxt").textContent = `${done} / ${total} · Día ${S.sess}`;
 }
 
 /* ============================================================
@@ -976,13 +1121,16 @@ function niceMax(v){
 }
 
 /* ---- volume per week (bars) ---- */
-function weekVolume(w){
-  const rec = S.log[w] || {};
+function dayVolume(w, d){
+  const rec = dayRec(w, d);
   return EX.reduce((t,e)=> t + vol(rec[e.id] || {}), 0);
 }
+const weekVolume = (w) => SESS.reduce((t,d)=> t + dayVolume(w,d), 0);
 function groupVolume(w, g){
-  const rec = S.log[w] || {};
-  return EX.filter(e=>e.g===g).reduce((t,e)=> t + vol(rec[e.id] || {}), 0);
+  return SESS.reduce((t,d)=>{
+    const rec = dayRec(w,d);
+    return t + EX.filter(e=>e.g===g).reduce((n,e)=> n + vol(rec[e.id] || {}), 0);
+  }, 0);
 }
 
 function drawVolChart(){
@@ -1020,9 +1168,8 @@ function drawVolChart(){
   $("#volTable").innerHTML = `<table class="data"><thead><tr><th>Week</th><th>Volume</th>
     <th>Days</th><th>Time</th><th>kcal</th></tr></thead><tbody>` +
     data.map(d=>{
-      const tw = S.tm[d.w] || {};
-      const tm = tw.el || 0;
-      const dy = (tw.days || []).length;
+      const tm = weekTime(d.w);
+      const dy = weekDays(d.w);
       return `<tr><td>W${d.w}</td><td>${fmt(d.v)}</td><td>${dy || "—"}</td>
         <td>${tm ? clock(tm) : "—"}</td><td>${tm ? Math.round(kcalFor(tm)) : "—"}</td></tr>`;
     }).join("") + `</tbody></table>
@@ -1035,10 +1182,12 @@ function drawExChart(){
   const svg = $("#exChart");
   svg.innerHTML = "";
   const id = $("#exSel").value;
-  const pts = [1,2,3,4].map(w=>({w, v: cell(w,id).w}));
-  const have = pts.filter(p=>p.v != null);
-  const W = 320, H = 180, L = 34, Rp = 12, T = 22, B = 30;
+  const pts = [];
+  [1,2,3,4].forEach(w => SESS.forEach(d => pts.push({w, d, c: cell(w, d, id)})));
+  const have = pts.filter(p=>p.c.w != null);
+  const W = 320, H = 180, L = 34, Rp = 12, T = 22, B = 34;
   const pw = W - L - Rp, ph = H - T - B;
+  const N = pts.length;
 
   const tblBtn = document.querySelector('[data-tbl="exTable"]');
   if(!have.length){
@@ -1052,43 +1201,56 @@ function drawExChart(){
   }
   tblBtn.classList.remove("hidden");
   svg.setAttribute("viewBox","0 0 320 180");
-  const vmax = niceMax(Math.max.apply(null, have.map(p=>p.v)) * 1.15);
+  const vmax = niceMax(Math.max.apply(null, have.map(p=>p.c.w)) * 1.15);
   [0,.5,1].forEach(f=>{
     const y = T + ph - ph*f;
     svg.appendChild(el("line",{x1:L, x2:W-Rp, y1:y, y2:y, class: f===0?"baseline":"gridline"}));
     svg.appendChild(el("text",{x:L-7, y:y+4, "text-anchor":"end"}, fmt(vmax*f)));
   });
-  const X = i => L + pw*(i+0.5)/4;
+  const X = i => L + pw*(i+0.5)/N;
   const Y = v => T + ph - (v/vmax)*ph;
+
+  // faint separator + one label per week
+  [1,2,3].forEach(k=>{
+    const x = L + pw*(k*3)/N;
+    svg.appendChild(el("line",{x1:x, x2:x, y1:T, y2:T+ph, class:"gridline"}));
+  });
+  [1,2,3,4].forEach((w,k)=>{
+    svg.appendChild(el("text",{x:L + pw*(k*3+1.5)/N, y:H-8, "text-anchor":"middle",
+      class:"xlab" + (w===S.week?" cur":"")}, "W"+w));
+  });
 
   let d = "", started = false;
   pts.forEach((p,i)=>{
-    if(p.v == null){ started = false; return; }
-    d += (started ? " L " : " M ") + X(i) + " " + Y(p.v);
+    if(p.c.w == null){ started = false; return; }
+    d += (started ? " L " : " M ") + X(i) + " " + Y(p.c.w);
     started = true;
   });
   svg.appendChild(el("path",{d, class:"lineseries"}));
 
   pts.forEach((p,i)=>{
-    svg.appendChild(el("text",{x:X(i), y:H-10, "text-anchor":"middle",
-      class:"xlab" + (p.w===S.week?" cur":"")}, "W"+p.w));
-    if(p.v == null) return;
-    svg.appendChild(el("circle",{cx:X(i), cy:Y(p.v), r:5, class:"dot"}));
-    svg.appendChild(el("text",{x:X(i), y:Y(p.v)-12, "text-anchor":"middle", class:"val"}, p.v));
-    const hit = el("rect",{x:X(i)-pw/8, y:T, width:pw/4, height:ph, class:"hit"});
-    const label = `Week ${p.w}: ${p.v} ${S.unit} × ${cell(p.w,id).r || "–"} reps`;
+    if(p.c.w == null) return;
+    const cur = p.w === S.week && p.d === S.sess;
+    svg.appendChild(el("circle",{cx:X(i), cy:Y(p.c.w), r: cur ? 5.5 : 4, class:"dot"}));
+    const hit = el("rect",{x:X(i)-pw/(2*N), y:T, width:pw/N, height:ph, class:"hit"});
+    const label = `W${p.w} D${p.d}: ${p.c.w} ${S.unit} × ${p.c.r || "–"} reps`;
     hit.addEventListener("click", ev=>showTip(ev, label));
     hit.addEventListener("mousemove", ev=>showTip(ev, label));
     svg.appendChild(hit);
   });
+  // label only the first and last logged points, to avoid a wall of numbers
+  [have[0], have[have.length-1]].forEach((p,k)=>{
+    if(!p || (k===1 && have.length===1)) return;
+    const i = pts.indexOf(p);
+    svg.appendChild(el("text",{x:X(i), y:Y(p.c.w)-11, "text-anchor":"middle", class:"val"}, p.c.w));
+  });
 
-  $("#exTable").innerHTML = `<table class="data"><thead><tr><th>Week</th><th>Weight (${S.unit})</th>
+  $("#exTable").innerHTML = `<table class="data"><thead><tr><th>Session</th><th>Weight (${S.unit})</th>
     <th>Reps</th><th>Volume</th></tr></thead><tbody>` +
-    [1,2,3,4].map(w=>{
-      const c = cell(w,id);
-      return `<tr><td>Week ${w}</td><td>${c.w != null ? c.w : "—"}</td>
-        <td>${c.r != null ? c.r : "—"}</td><td>${vol(c) ? fmt(vol(c)) : "—"}</td></tr>`;
-    }).join("") + `</tbody></table>`;
+    pts.filter(p=>p.c.w != null || p.c.r != null).map(p=>
+      `<tr><td>W${p.w} · D${p.d}</td><td>${p.c.w != null ? p.c.w : "—"}</td>
+        <td>${p.c.r != null ? p.c.r : "—"}</td><td>${vol(p.c) ? fmt(vol(p.c)) : "—"}</td></tr>`
+    ).join("") + `</tbody></table>`;
 }
 
 /* ---- volume by group (horizontal bars, this week) ---- */
@@ -1120,8 +1282,7 @@ function drawGrpChart(){
 function drawTimeChart(){
   const svg = $("#timeChart");
   svg.innerHTML = "";
-  const t = TM();
-  const rows = GROUPS.map(g=>({name:g.short, v:(t.bl[g.id] || 0)}));
+  const rows = GROUPS.map(g=>({name:g.short, v:weekBlock(S.week, g.id)}));
   const peak = Math.max.apply(null, rows.map(r=>r.v));
   const max = peak > 0 ? peak * 1.05 : 60000;
   const W = 320, L = 52, Rp = 46, T = 8, bh = 22, gap = 20;
@@ -1144,9 +1305,8 @@ function drawTimeChart(){
 function drawDaysChart(){
   const svg = $("#daysChart");
   svg.innerHTML = "";
-  const data = [1,2,3,4].map(w=>({w, v:((S.tm[w] && S.tm[w].days) || []).length}));
-  const peak = Math.max.apply(null, data.map(d=>d.v));
-  const max = Math.max(peak, 3);
+  const data = [1,2,3,4].map(w=>({w, v:weekDays(w)}));
+  const max = 3;
   const W = 320, H = 150, L = 26, Rp = 8, T = 22, B = 30;
   const pw = W - L - Rp, ph = H - T - B;
   const bw = Math.min(46, pw/4 - 12);
@@ -1166,27 +1326,35 @@ function drawDaysChart(){
       class:"xlab" + (d.w===S.week?" cur":"")}, "W"+d.w));
   });
 
-  const days = TM().days;
-  const box = $("#dayList");
-  box.innerHTML = days.length
-    ? days.map(d=>`<button class="daychip" data-day-iso="${d}">${dayLabel(d)}<span class="x">✕</span></button>`).join("")
-    : `<p class="daynone">No days marked for Week ${S.week} yet.</p>`;
-  box.querySelectorAll("[data-day-iso]").forEach(b=>{
-    b.addEventListener("click", ()=> toggleDay(b.dataset.dayIso));
-  });
+  $("#dayList").innerHTML = SESS.map(d=>{
+    const t = TMraw(S.week, d) || {};
+    const trained = dayTrained(S.week, d);
+    const bits = [];
+    if(t.date) bits.push(dayLabel(t.date));
+    if(t.el)   bits.push(clock(t.el));
+    const v = dayVolume(S.week, d);
+    if(v)      bits.push(fmt(v) + " " + S.unit);
+    return `<div class="dayrow${trained?" on":""}">
+      <b>Día ${d}</b><span>${bits.length ? bits.join(" · ") : "sin entrenar"}</span>
+      ${t.over ? '<em class="ok">✓</em>' : ""}</div>`;
+  }).join("");
 }
 
 /* ---- summary tiles ---- */
-const totalDays = () => [1,2,3,4]
-  .reduce((n,w)=> n + (((S.tm[w] && S.tm[w].days) || []).length), 0);
+const totalDays = () => [1,2,3,4].reduce((n,w)=> n + weekDays(w), 0);
 
 function drawTiles(){
-  const w = S.week;
+  const w = S.week, d = S.sess;
   const v = weekVolume(w), pv = w>1 ? weekVolume(w-1) : 0;
-  const done = EX.filter(e=>{const c=cell(w,e.id); return c.w!=null&&c.r!=null;}).length;
+  const t = TM();
+  const done = EX.filter(e=>{const c=cell(w,d,e.id); return c.w!=null&&c.r!=null;}).length;
   let best = {n:"—", w:0};
-  EX.forEach(e=>{ const c = cell(w,e.id); if(c.w && c.w > best.w) best = {n:e.n, w:c.w}; });
-  const totalReps = EX.reduce((t,e)=> t + (cell(w,e.id).r || 0), 0);
+  SESS.forEach(dd=> EX.forEach(e=>{
+    const c = cell(w,dd,e.id); if(c.w && c.w > best.w) best = {n:e.n, w:c.w};
+  }));
+  const totalReps = SESS.reduce((n,dd)=>
+    n + EX.reduce((m,e)=> m + (cell(w,dd,e.id).r || 0), 0), 0);
+  const wt = weekTime(w);
 
   let delta = `<p class="d flat">First week logged</p>`;
   if(pv > 0 && v > 0){
@@ -1204,22 +1372,27 @@ function drawTiles(){
       <p class="v">${fmt(v)}<span class="u">${S.unit}</span></p>
       ${delta}
     </div>
-    <div class="tile"><p class="k">EXERCISES LOGGED</p><p class="v">${done}<span class="u">/ ${EX.length}</span></p></div>
-    <div class="tile"><p class="k">TOTAL REPS</p><p class="v">${totalReps}</p></div>
-    <div class="tile"><p class="k">SESSION TIME</p><p class="v">${clock(TM().el)}</p></div>
-    <div class="tile"><p class="k">BLOCKS DONE</p><p class="v">${TM().done.length}<span class="u">/ ${GROUPS.length}</span></p></div>
+    <div class="tile"><p class="k">LOGGED · DÍA ${d}</p><p class="v">${done}<span class="u">/ ${EX.length}</span></p></div>
+    <div class="tile"><p class="k">TOTAL REPS · WEEK</p><p class="v">${totalReps}</p></div>
     <div class="tile">
-      <p class="k">CALORIES BURNED</p>
-      <p class="v">${TM().el ? Math.round(kcalFor(TM().el)) : "—"}<span class="u">${TM().el ? "kcal" : ""}</span></p>
-      <p class="d flat">${TM().el ? MET_LABEL[S.body.met] + " · " + Math.round(bodyDisp()) + " " + S.unit : "Use the chronometer"}</p>
+      <p class="k">SESSION TIME · DÍA ${d}</p><p class="v">${clock(t.el)}</p>
+      <p class="d flat">${clock(wt)} this week</p>
+    </div>
+    <div class="tile">
+      <p class="k">BLOCKS DONE · DÍA ${d}</p><p class="v">${t.done.length}<span class="u">/ ${GROUPS.length}</span></p>
+    </div>
+    <div class="tile">
+      <p class="k">CALORIES · WEEK</p>
+      <p class="v">${wt ? Math.round(kcalFor(wt)) : "—"}<span class="u">${wt ? "kcal" : ""}</span></p>
+      <p class="d flat">${wt ? MET_LABEL[S.body.met] + " · " + Math.round(bodyDisp()) + " " + S.unit : "Use the chronometer"}</p>
     </div>
     <div class="tile">
       <p class="k">DAYS TRAINED</p>
-      <p class="v">${TM().days.length}<span class="u">this week</span></p>
-      <p class="d flat">${totalDays()} across 4 weeks</p>
+      <p class="v">${weekDays(w)}<span class="u">/ 3 this week</span></p>
+      <p class="d flat">${[1,2,3,4].reduce((n,k)=>n+weekDays(k),0)} across 4 weeks</p>
     </div>
     <div class="tile" style="grid-column:1/-1">
-      <p class="k">HEAVIEST LIFT</p>
+      <p class="k">HEAVIEST LIFT · WEEK</p>
       <p class="v">${best.w ? best.w : "—"}<span class="u">${best.w ? S.unit : ""}</span></p>
       <p class="d flat">${best.n}</p>
     </div>`;
@@ -1241,9 +1414,7 @@ $("#metSel").addEventListener("change", e=>{
   S.body.met = parseFloat(e.target.value); save();
   drawTiles(); drawVolChart();
 });
-$("#markToday").addEventListener("click", ()=>{
-  if(!markToday()) toggleDay(today()); else renderStats();
-});
+$("#markToday").addEventListener("click", ()=>{ markToday(); renderStats(); });
 
 /* ============================================================
    6. WIRING
@@ -1261,6 +1432,7 @@ $("#weekSel").addEventListener("change", e=>{
   S.week = parseInt(e.target.value,10);
   const nt = TM(); nt.run = false; nt.last = null;
   save();
+  renderDaySeg();
   renderList();
   if(!$("#viewStats").classList.contains("hidden")) renderStats();
 });
@@ -1352,6 +1524,7 @@ function boot(){
   $("#unitTag").textContent = "· " + S.unit;
   $("#btnUnit").textContent = "Switch to " + (S.unit === "kg" ? "lb" : "kg");
   renderChips();
+  renderDaySeg();
   renderList();
   if(!$("#viewStats").classList.contains("hidden")) renderStats();
 }
