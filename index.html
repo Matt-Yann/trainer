@@ -95,28 +95,27 @@
     border-bottom:1px solid var(--line);
     padding-top:env(safe-area-inset-top);
   }
-  .hd{max-width:560px;margin:0 auto;padding:10px 12px 10px;display:flex;align-items:center;gap:10px}
-  .title{font-size:15px;font-weight:650;letter-spacing:-0.01em;margin:0;flex:1;min-width:0;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .title span{color:var(--muted);font-weight:500}
-  select.week{
+  /* every control in the settings row is the same 42px tall pill */
+  .setrow{max-width:560px;margin:0 auto;padding:0 12px 10px;display:flex;align-items:center;gap:8px}
+  select.sel{
     appearance:none;-webkit-appearance:none;
+    flex:1;min-width:0;height:42px;
     background:var(--surface);color:var(--ink);
     border:1px solid var(--line);border-radius:999px;
-    font:inherit;font-size:14px;font-weight:600;
-    padding:8px 30px 8px 14px;
+    font:inherit;font-size:14px;font-weight:650;
+    padding:0 32px 0 16px;cursor:pointer;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4.5 L6 8.5 L10 4.5' fill='none' stroke='%23898781' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-    background-repeat:no-repeat;background-position:right 10px center;
+    background-repeat:no-repeat;background-position:right 12px center;
   }
   .iconbtn{
     background:var(--surface);border:1px solid var(--line);color:var(--ink-2);
-    width:36px;height:36px;border-radius:999px;display:grid;place-items:center;
-    font-size:15px;cursor:pointer;flex:0 0 auto;
+    width:42px;height:42px;border-radius:999px;display:grid;place-items:center;
+    font-size:16px;cursor:pointer;flex:0 0 auto;
   }
-  .tabs{max-width:560px;margin:0 auto;padding:0 12px 8px;display:flex;gap:6px}
+  .tabs{max-width:560px;margin:0 auto;padding:10px 12px 8px;display:flex;gap:6px}
   .tab{
-    flex:1;padding:8px 4px;border-radius:10px;border:1px solid transparent;
-    background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:600;
+    flex:1;height:42px;border-radius:12px;border:1px solid transparent;
+    background:transparent;color:var(--muted);font:inherit;font-size:15px;font-weight:650;
     cursor:pointer;
   }
   .tab[aria-selected="true"]{background:var(--surface);color:var(--ink);border-color:var(--line)}
@@ -157,6 +156,8 @@
     border-radius:14px;padding:15px 12px;cursor:pointer;margin:2px 0 4px;text-align:center;
   }
   .gfin:active{background:color-mix(in srgb, var(--series-1) 14%, transparent)}
+  .gfin:not(.act):not(.gfin-done){border-color:var(--line);color:var(--muted);border-width:1px;
+    font-size:14px;padding:13px 12px}
   .gfin-done{
     border-color:var(--good);color:var(--good);cursor:default;
     background:color-mix(in srgb, var(--good) 8%, transparent);font-size:15px;
@@ -263,10 +264,8 @@
     .thumb .f2{animation:none;opacity:1}
   }
   .meta{flex:1;min-width:0}
-  .name{font-size:15px;font-weight:600;letter-spacing:-0.01em;margin:1px 0 2px}
+  .name{font-size:15px;font-weight:600;letter-spacing:-0.01em;margin:1px 0 10px}
   .name .en{font-size:12px;font-weight:500;color:var(--muted);white-space:nowrap}
-  .presc{font-size:12px;color:var(--muted);margin:0 0 10px}
-  .presc em{font-style:normal;color:var(--ink-2)}
   .fields{display:flex;gap:8px}
   .field{flex:1;min-width:0}
   .field label{display:block;font-size:10px;font-weight:700;letter-spacing:.07em;
@@ -400,6 +399,14 @@
     border:1px solid color-mix(in srgb, var(--bad) 45%, var(--line));
   }
 
+  .warmnote{
+    font-size:13px;color:var(--muted);margin:0 0 10px;padding:12px 14px;
+    background:var(--surface);border:1px dashed var(--line);border-radius:14px;
+  }
+  .card.carried .field input{color:var(--muted);font-weight:600}
+  .card.carried{border-style:dashed}
+  .carrytag{font-size:10.5px;color:var(--muted);margin:7px 0 0;letter-spacing:.02em}
+
   .hidden{display:none !important}
   .foot{font-size:11px;color:var(--muted);text-align:center;margin:20px 0 0;line-height:1.6}
   .foot a{color:var(--ink-2)}
@@ -408,19 +415,19 @@
 <body>
 
 <header>
-  <div class="hd">
-    <h1 class="title">4-Week Trainer <span id="unitTag">· kg</span></h1>
-    <select class="week" id="weekSel" aria-label="Select week">
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tabTrain" role="tab" aria-selected="true">Workout</button>
+    <button class="tab" id="tabStats" role="tab" aria-selected="false">Statistics</button>
+  </div>
+  <div class="setrow">
+    <select class="sel" id="monthSel" aria-label="Select month"></select>
+    <select class="sel" id="weekSel" aria-label="Select week">
       <option value="1">Week 1</option>
       <option value="2">Week 2</option>
       <option value="3">Week 3</option>
       <option value="4">Week 4</option>
     </select>
     <button class="iconbtn" id="themeBtn" aria-label="Switch theme">◐</button>
-  </div>
-  <div class="tabs" role="tablist">
-    <button class="tab" id="tabTrain" role="tab" aria-selected="true">Workout</button>
-    <button class="tab" id="tabStats" role="tab" aria-selected="false">Statistics</button>
   </div>
 </header>
 
@@ -431,7 +438,6 @@
       This viewer can't save data — anything you type is lost on reload.
       Download the file and open it in your browser (or add it to your home screen) instead.
     </p>
-    <div class="chips" id="dayChips"></div>
     <div class="dayseg" id="daySeg"></div>
 
     <div class="timerbar" id="timerBar">
@@ -487,7 +493,7 @@
 
     <div class="panel">
       <h3>Total volume by week</h3>
-      <p class="sub">Weight × reps, all exercises. <span id="volUnit">kg</span></p>
+      <p class="sub">Weight × reps, all exercises, in <b id="volMonth">Mes 1</b>. <span id="volUnit">kg</span></p>
       <div class="legendrow">
         <span class="lg"><i></i>Selected week</span>
         <span class="lg"><i style="background:var(--seq-200)"></i>Other weeks</span>
@@ -499,7 +505,7 @@
 
     <div class="panel">
       <h3>Progress per exercise</h3>
-      <p class="sub">Working weight across all 12 sessions (4 weeks × 3 days).</p>
+      <p class="sub">Working weight across the 12 sessions of the selected month.</p>
       <select id="exSel" aria-label="Select exercise"></select>
       <svg class="chart" id="exChart" viewBox="0 0 320 180" role="img" aria-label="Weight per week"></svg>
       <button class="toggletbl" data-tbl="exTable">Show numbers</button>
@@ -618,6 +624,8 @@ function thumb(key, name, i){
    2. PROGRAM
    ============================================================ */
 const GROUPS = [
+  {id:"warmup",  short:"Calentamiento", name:"Calentamiento · Warm-up",
+   note:"Cinta, bici o movilidad · 5–10 min", noEx:true},
   {id:"piernas", short:"Piernas", name:"Piernas · Legs"},
   {id:"espalda", short:"Espalda", name:"Espalda y hombro posterior · Back & rear delts"},
   {id:"hombro",  short:"Hombro",  name:"Hombro · Shoulders"},
@@ -665,7 +673,8 @@ const store = {
   }
 };
 const SESS = ["1","2","3"];                 // three training days inside each week
-const blank = () => ({v:2, week:1, sess:"1", unit:"kg", day:"all", theme:"auto",
+const MONTHS = 12;
+const blank = () => ({v:3, month:1, week:1, sess:"1", unit:"kg", theme:"auto",
                       log:{}, tm:{}, body:{kg:70, met:5}});
 const RAW = store.read() || {};
 let S = Object.assign(blank(), RAW);
@@ -673,24 +682,31 @@ if(!S.log) S.log = {};
 if(!S.tm)  S.tm  = {};
 if(!S.body) S.body = {kg:70, met:5};
 if(!S.sess || SESS.indexOf(S.sess) === -1) S.sess = "1";
+if(!S.month || S.month < 1 || S.month > MONTHS) S.month = 1;
 
-/* v1 -> v2 migration: one entry per week becomes one entry per day, and the
-   old week data lands on day 1 so nothing already logged is lost. */
-if(RAW.v !== 2 && Object.keys(RAW).length){
-  const ol = S.log || {}, ot = S.tm || {}, nl = {}, nt = {};
-  [1,2,3,4].forEach(w=>{
-    if(ol[w] && Object.keys(ol[w]).length) nl[w] = {"1": ol[w]};
-    if(ot[w]){
-      const t = ot[w];
-      if(t.days && t.days.length) t.date = t.days[0];
-      delete t.days;
-      nt[w] = {"1": t};
-    }
-  });
-  S.log = nl; S.tm = nt; S.v = 2;
+/* Migrations, run in order:
+   v1 -> v2  one entry per week becomes one entry per day (old data -> day 1)
+   v2 -> v3  everything gets wrapped under a month (old data -> month 1)      */
+if(Object.keys(RAW).length && RAW.v !== 3){
+  if(!RAW.v){                                    // v1
+    const ol = S.log || {}, ot = S.tm || {}, nl = {}, nt = {};
+    [1,2,3,4].forEach(w=>{
+      if(ol[w] && Object.keys(ol[w]).length) nl[w] = {"1": ol[w]};
+      if(ot[w]){
+        const t = ot[w];
+        if(t.days && t.days.length) t.date = t.days[0];
+        delete t.days;
+        nt[w] = {"1": t};
+      }
+    });
+    S.log = nl; S.tm = nt;
+  }
+  S.log = {1: S.log || {}};                      // v2 -> v3
+  S.tm  = {1: S.tm  || {}};
+  S.v = 3;
   store.write(S);
 }
-S.v = 2;
+S.v = 3;
 const save = () => store.write(S);
 
 /* --- body weight & energy expenditure ---------------------------------
@@ -718,18 +734,42 @@ const dayLabel = (iso) => {
   return `${wd} ${d}/${m}`;
 };
 
-const dayRec = (w, d) => (S.log[w] && S.log[w][d]) || {};
-const cell = (w, d, id) => dayRec(w, d)[id] || {};
-function setCell(w, d, id, field, val){
-  S.log[w] = S.log[w] || {};
-  S.log[w][d] = S.log[w][d] || {};
-  S.log[w][d][id] = S.log[w][d][id] || {};
-  if(val === "" || val === null || isNaN(val)) delete S.log[w][d][id][field];
-  else S.log[w][d][id][field] = val;
+const dayRec = (w, d, m) => {
+  m = m || S.month;
+  return (S.log[m] && S.log[m][w] && S.log[m][w][d]) || {};
+};
+const cell = (w, d, id, m) => dayRec(w, d, m)[id] || {};
+function setCell(w, d, id, field, val, m){
+  m = m || S.month;
+  S.log[m] = S.log[m] || {};
+  S.log[m][w] = S.log[m][w] || {};
+  S.log[m][w][d] = S.log[m][w][d] || {};
+  S.log[m][w][d][id] = S.log[m][w][d][id] || {};
+  if(val === "" || val === null || isNaN(val)) delete S.log[m][w][d][id][field];
+  else S.log[m][w][d][id][field] = val;
   save();
 }
-const dayHasData = (w, d) => Object.keys(dayRec(w, d))
-  .some(k => { const c = dayRec(w, d)[k]; return c && (c.w != null || c.r != null); });
+const dayHasData = (w, d, m) => Object.keys(dayRec(w, d, m))
+  .some(k => { const c = dayRec(w, d, m)[k]; return c && (c.w != null || c.r != null); });
+
+/* Most recent value of one field for an exercise, strictly before (month, week,
+   day). Each field is looked up on its own, so a session where you only wrote
+   the weight still carries that weight forward. */
+function prevField(w, d, id, field){
+  const cur = [S.month, w, parseInt(d,10)];
+  const before = (a) => a[0] < cur[0] || (a[0] === cur[0] &&
+                 (a[1] < cur[1] || (a[1] === cur[1] && a[2] < cur[2])));
+  for(let m = S.month; m >= 1; m--){
+    for(let wk = 4; wk >= 1; wk--){
+      for(let dd = 3; dd >= 1; dd--){
+        if(!before([m, wk, dd])) continue;
+        const v = cell(wk, String(dd), id, m)[field];
+        if(v != null) return {v, m, w:wk, d:dd};
+      }
+    }
+  }
+  return null;
+}
 const vol = (c) => (c.w && c.r) ? c.w * c.r : 0;
 const fmt = (n) => {
   if(!isFinite(n)) return "0";
@@ -747,16 +787,25 @@ const freshTimer = () => ({
   run:false, last:null, el:0,                 // running? / last tick / session elapsed
   bl:{}, done:[], act:GROUPS[0].id, rest:0, over:false, date:null
 });
-function TM(w, d){
-  w = w || S.week; d = d || S.sess;
-  if(!S.tm[w]) S.tm[w] = {};
-  if(!S.tm[w][d]) S.tm[w][d] = freshTimer();
-  const t = S.tm[w][d];
+function TM(w, d, m){
+  w = w || S.week; d = d || S.sess; m = m || S.month;
+  if(!S.tm[m]) S.tm[m] = {};
+  if(!S.tm[m][w]) S.tm[m][w] = {};
+  if(!S.tm[m][w][d]) S.tm[m][w][d] = freshTimer();
+  const t = S.tm[m][w][d];
   if(!t.bl) t.bl = {};
   if(!t.done) t.done = [];
+  t.done = t.done.filter(id => GROUPS.some(g => g.id === id));
+  if(!t.over){
+    const firstOpen = GROUPS.map(g=>g.id).filter(id => t.done.indexOf(id) === -1)[0] || null;
+    if(!t.act || t.done.indexOf(t.act) !== -1 || !GROUPS.some(g=>g.id===t.act)) t.act = firstOpen;
+  }
   return t;
 }
-const TMraw = (w, d) => (S.tm[w] && S.tm[w][d]) || null;
+const TMraw = (w, d, m) => {
+  m = m || S.month;
+  return (S.tm[m] && S.tm[m][w] && S.tm[m][w][d]) || null;
+};
 function markToday(){
   const t = TM();
   if(!t.date){ t.date = today(); save(); return true; }
@@ -844,9 +893,23 @@ function restOver(){
   save();
 }
 
+/* Turn the greyed pre-filled numbers of one block into real logged sets. */
+function commitBlock(id){
+  EX.filter(e => e.g === id).forEach(e=>{
+    const c = cell(S.week, S.sess, e.id);
+    if(c.w != null && c.r != null) return;                 // already logged
+    const wi = document.getElementById("w-" + e.id);
+    const ri = document.getElementById("r-" + e.id);
+    if(!wi || !ri || wi.value === "" || ri.value === "") return;
+    setCell(S.week, S.sess, e.id, "w", parseFloat(wi.value));
+    setCell(S.week, S.sess, e.id, "r", parseFloat(ri.value));
+  });
+}
+
 function finishBlock(id){
   const t = TM();
   markToday();
+  commitBlock(id);
   if(!t.run && t.el === 0){ t.run = true; t.last = Date.now(); }
   if(t.done.indexOf(id) === -1) t.done.push(id);
   const next = GROUPS.map(g=>g.id).filter(g => t.done.indexOf(g) === -1)[0] || null;
@@ -884,6 +947,7 @@ function endSession(){
     if(!yes) return;
     t.run = false; t.last = null; t.rest = 0; t.over = true;
     markToday();
+    GROUPS.forEach(g => commitBlock(g.id));
     beep(2); buzz([260,110,260]);
     save(); renderList(); paintTimers();
     if(!$("#viewStats").classList.contains("hidden")) renderStats();
@@ -892,8 +956,8 @@ function endSession(){
 function resetSession(keepDate){
   const old = TM();
   const date = keepDate ? old.date : null;
-  S.tm[S.week][S.sess] = freshTimer();
-  S.tm[S.week][S.sess].date = date;
+  S.tm[S.month][S.week][S.sess] = freshTimer();
+  S.tm[S.month][S.week][S.sess].date = date;
   save(); renderList(); paintTimers();
   if(!$("#viewStats").classList.contains("hidden")) renderStats();
 }
@@ -909,7 +973,7 @@ function paintTimers(){
   const t = TM();
   const bar = $("#timerBar");
   $("#tLabel").textContent = (t.over ? "Sesión completada · " : "Sesión · ")
-    + "Week " + S.week + " · Día " + S.sess;
+    + "M" + S.month + " · W" + S.week + " · Día " + S.sess;
   $("#tGlobal").textContent = clock(t.el);
   bar.classList.toggle("live", t.run && t.rest <= 0);
   const btn = $("#tToggle");
@@ -964,16 +1028,6 @@ $("#rPlus").addEventListener("click", ()=>{
    ============================================================ */
 const listEl = $("#list");
 
-function renderChips(){
-  const box = $("#dayChips");
-  const all = [{id:"all",name:"Todo"}].concat(GROUPS.map(g=>({id:g.id,name:g.short})));
-  box.innerHTML = all.map(g =>
-    `<button class="chip" data-day="${g.id}" aria-pressed="${S.day===g.id}">${g.name}</button>`).join("");
-  box.querySelectorAll(".chip").forEach(b=>{
-    b.addEventListener("click", ()=>{ S.day = b.dataset.day; save(); renderChips(); renderList(); });
-  });
-}
-
 function renderDaySeg(){
   const box = $("#daySeg");
   box.innerHTML = SESS.map(d=>{
@@ -1009,45 +1063,55 @@ function dayStrip(w, id){
 
 function renderList(){
   const w = S.week, ses = S.sess;
-  const shown = EX.filter(e => S.day==="all" || e.g===S.day);
   const t = TM();
   let html = "";
   GROUPS.forEach(g=>{
-    const items = shown.filter(e => e.g===g.id);
-    if(!items.length) return;
+    const items = EX.filter(e => e.g === g.id);
+    if(!items.length && !g.noEx) return;
     const fin = t.done.indexOf(g.id) !== -1;
-    html += `<div class="group"><div class="ghead">` +
+    html += `<div class="group${g.noEx?" warm":""}"><div class="ghead">` +
       `<h2>${g.short}<small>${g.name.split(" · ")[1]}</small></h2>` +
       `<span class="gtime" id="gt-${g.id}">${clock(t.bl[g.id] || 0)}</span></div>`;
+
+    if(g.noEx){
+      html += `<p class="warmnote">${g.note}</p>`;
+    }
     items.forEach((e, i)=>{
       const c = cell(w, ses, e.id);
       const done = c.w != null && c.r != null;
+      const pw = c.w != null ? null : prevField(w, ses, e.id, "w");
+      const pr = c.r != null ? null : prevField(w, ses, e.id, "r");
+      const vw = c.w != null ? c.w : (pw ? pw.v : "");
+      const vr = c.r != null ? c.r : (pr ? pr.v : "");
+      const src = pw || pr;
+      const carried = !done && !!src;
       html += `
-      <div class="card${done?" done":""}${fin?" blockdone":""}" data-card="${e.id}">
+      <div class="card${done?" done":""}${fin?" blockdone":""}${carried?" carried":""}" data-card="${e.id}">
         <div class="thumb">${thumb(e.a, e.n, i)}</div>
         <div class="meta">
           <p class="name">${fin?'<span class="cdone">✓</span>':""}${e.n} <span class="en">${e.e}</span></p>
-          <p class="presc"><em>${e.s}</em> · ${e.m}</p>
           <div class="fields">
             <div class="field">
               <label for="w-${e.id}">Weight (${S.unit})</label>
               <input id="w-${e.id}" type="number" inputmode="decimal" step="0.5" min="0"
-                     placeholder="—" value="${c.w != null ? c.w : ""}" data-ex="${e.id}" data-f="w">
+                     placeholder="—" value="${vw}" data-ex="${e.id}" data-f="w">
             </div>
             <div class="field">
               <label for="r-${e.id}">Reps</label>
               <input id="r-${e.id}" type="number" inputmode="numeric" step="1" min="0"
-                     placeholder="—" value="${c.r != null ? c.r : ""}" data-ex="${e.id}" data-f="r">
+                     placeholder="—" value="${vr}" data-ex="${e.id}" data-f="r">
             </div>
           </div>
+          ${carried ? `<p class="carrytag">Copiado de M${src.m} · W${src.w} · D${src.d}</p>` : ""}
           ${dayStrip(w, e.id)}
         </div>
       </div>`;
     });
     if(fin){
       html += `<div class="gfin gfin-done" id="gf-${g.id}">✓ Bloque terminado · ${clock(t.bl[g.id] || 0)}</div>`;
-    } else if(g.id === t.act && !t.over){
-      html += `<button class="gfin" id="gf-${g.id}" data-fin="${g.id}">Terminar ${g.short}</button>`;
+    } else if(!t.over){
+      html += `<button class="gfin${g.id === t.act ? " act" : ""}" id="gf-${g.id}" ` +
+              `data-fin="${g.id}">Terminar ${g.short}</button>`;
     }
     html += `</div>`;
   });
@@ -1059,7 +1123,11 @@ function renderList(){
       setCell(S.week, S.sess, inp.dataset.ex, inp.dataset.f, v);
       const card = inp.closest(".card");
       const c = cell(S.week, S.sess, inp.dataset.ex);
-      card.classList.toggle("done", c.w != null && c.r != null);
+      const full = c.w != null && c.r != null;
+      card.classList.toggle("done", full);
+      if(full) card.classList.remove("carried");
+      const tag = card.querySelector(".carrytag");
+      if(full && tag) tag.remove();
       const strip = card.querySelector(".dayhist");
       if(strip) strip.outerHTML = dayStrip(S.week, inp.dataset.ex);
       updateProgress(); renderDaySeg();
@@ -1257,7 +1325,7 @@ function drawExChart(){
 function drawGrpChart(){
   const svg = $("#grpChart");
   svg.innerHTML = "";
-  const rows = GROUPS.map(g=>({name:g.short, v:groupVolume(S.week, g.id)}));
+  const rows = GROUPS.filter(g=>!g.noEx).map(g=>({name:g.short, v:groupVolume(S.week, g.id)}));
   const gpeak = Math.max.apply(null, rows.map(r=>r.v));
   const max = gpeak > 0 ? niceMax(gpeak) : 100;
   const W = 320, L = 52, Rp = 46, T = 8;
@@ -1285,7 +1353,7 @@ function drawTimeChart(){
   const rows = GROUPS.map(g=>({name:g.short, v:weekBlock(S.week, g.id)}));
   const peak = Math.max.apply(null, rows.map(r=>r.v));
   const max = peak > 0 ? peak * 1.05 : 60000;
-  const W = 320, L = 52, Rp = 46, T = 8, bh = 22, gap = 20;
+  const W = 320, L = 90, Rp = 44, T = 8, bh = 22, gap = 20;
   rows.forEach((r,i)=>{
     const y = T + i*(bh+gap);
     const w = (r.v/max)*(W-L-Rp);
@@ -1368,7 +1436,7 @@ function drawTiles(){
 
   $("#tiles").innerHTML = `
     <div class="tile" style="grid-column:1/-1">
-      <p class="k">TOTAL VOLUME · WEEK ${w}</p>
+      <p class="k">TOTAL VOLUME · MES ${S.month} · WEEK ${w}</p>
       <p class="v">${fmt(v)}<span class="u">${S.unit}</span></p>
       ${delta}
     </div>
@@ -1405,6 +1473,7 @@ function renderStats(){
   $("#metSel").value = String(S.body.met);
   drawTiles(); drawDaysChart(); drawVolChart(); drawExChart(); drawGrpChart(); drawTimeChart();
   $("#volUnit").textContent = S.unit;
+  $("#volMonth").textContent = "Mes " + S.month;
 }
 $("#bodyW").addEventListener("input", e=>{
   setBody(parseFloat(e.target.value));
@@ -1419,12 +1488,23 @@ $("#markToday").addEventListener("click", ()=>{ markToday(); renderStats(); });
 /* ============================================================
    6. WIRING
    ============================================================ */
+$("#monthSel").innerHTML = Array.from({length:MONTHS}, (_,i)=>
+  `<option value="${i+1}">Mes ${i+1}</option>`).join("");
 $("#weekSel").value = String(S.week);
 $("#exSel").innerHTML = GROUPS.map(g =>
   `<optgroup label="${g.short}">` +
   EX.filter(e=>e.g===g.id).map(e=>`<option value="${e.id}">${e.n}</option>`).join("") +
   `</optgroup>`).join("");
 
+$("#monthSel").addEventListener("change", e=>{
+  tick();
+  const prev = TM(); prev.run = false; prev.last = null;
+  S.month = parseInt(e.target.value,10);
+  const nt = TM(); nt.run = false; nt.last = null;
+  save();
+  renderDaySeg(); renderList();
+  if(!$("#viewStats").classList.contains("hidden")) renderStats();
+});
 $("#weekSel").addEventListener("change", e=>{
   tick();                                   // settle the week we are leaving
   const prev = TM();
@@ -1472,7 +1552,6 @@ function applyTheme(){
 
 function setUnit(u){
   S.unit = u; save();
-  $("#unitTag").textContent = "· " + u;
   $("#btnUnit").textContent = "Switch to " + (u === "kg" ? "lb" : "kg");
   renderList();
   if(!$("#viewStats").classList.contains("hidden")) renderStats();
@@ -1520,10 +1599,9 @@ $("#btnReset").addEventListener("click", ()=>{
 function boot(){
   applyTheme();
   $("#warnBar").classList.toggle("hidden", CAN_STORE);
+  $("#monthSel").value = String(S.month);
   $("#weekSel").value = String(S.week);
-  $("#unitTag").textContent = "· " + S.unit;
   $("#btnUnit").textContent = "Switch to " + (S.unit === "kg" ? "lb" : "kg");
-  renderChips();
   renderDaySeg();
   renderList();
   if(!$("#viewStats").classList.contains("hidden")) renderStats();
