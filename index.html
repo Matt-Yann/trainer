@@ -440,15 +440,26 @@
   .callout.bad{background:color-mix(in srgb, var(--bad) 13%, var(--surface))}
   .callout.bad .ic{color:var(--bad)}
   .frow{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
-  .fld{flex:1;min-width:88px}
+  .fld{flex:1;min-width:88px;display:flex;flex-direction:column;justify-content:flex-end}
   .fld label{display:block;font-size:10.5px;font-weight:600;letter-spacing:.04em;
-    color:var(--muted);margin:0 0 4px}
+    color:var(--muted);margin:0 0 4px;line-height:1.25;min-height:13px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* filas de ancho fijo: nada envuelve ni se descuadra en pantallas estrechas */
+  .gridrow{display:grid;gap:8px;align-items:end;margin-bottom:0}
+  .gridrow.add{grid-template-columns:minmax(0,1fr) 88px 50px}
+  .gridrow.day{grid-template-columns:minmax(0,1fr) auto}
+  .gridrow.wai{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}
+  .btn.mini{flex:0 0 auto;min-width:0;height:42px;padding:0 12px;display:flex;
+    align-items:center;justify-content:center;white-space:nowrap;font-size:13px}
+  .btn.mini.plus{font-size:20px;font-weight:600;padding:0}
   .fld input, .fld select{
     width:100%;height:42px;border-radius:12px;border:1px solid var(--line);
     background:var(--surface-2);color:var(--ink);font:inherit;font-size:15px;padding:0 11px;
     font-variant-numeric:tabular-nums;
   }
   .fld input[type=date]{padding-right:6px}
+  /* .panel select trae margin-bottom:12px, que descuadraba las filas */
+  .fld select{margin:0;height:42px;padding:0 30px 0 11px;font-weight:400}
   .btn.go{background:var(--ink);color:var(--plane);border-color:var(--ink);font-weight:680}
   .seg{display:flex;gap:6px;margin:0 0 12px}
   .seg button{flex:1;height:38px;border-radius:11px;border:1px solid var(--line);
@@ -499,6 +510,25 @@
   .tbl td .x{background:none;border:0;color:var(--muted);font:inherit;font-size:15px;
     line-height:1;cursor:pointer;padding:0 2px}
   .tbl td.act{width:1%;white-space:nowrap}
+
+  /* ---- color por momento del día ---- */
+  :root{--m-desayuno:#A8751B; --m-comida:#2F7BD8; --m-cena:#159E8E; --m-otros:#898781}
+  @media (prefers-color-scheme: dark){
+    :root:where(:not([data-theme="light"])){
+      --m-desayuno:#C2882C; --m-comida:#4B93E4; --m-cena:#1E9C8B; --m-otros:#9a9891;
+    }
+  }
+  :root[data-theme="dark"]{
+    --m-desayuno:#C2882C; --m-comida:#4B93E4; --m-cena:#1E9C8B; --m-otros:#9a9891;
+  }
+  .seg button{position:relative;padding-left:20px}
+  .seg button::before{content:"";position:absolute;left:8px;top:50%;transform:translateY(-50%);
+    width:8px;height:8px;border-radius:999px;background:var(--mc,var(--m-otros))}
+  .seg button[aria-pressed="true"]::before{box-shadow:0 0 0 1.5px var(--plane)}
+  .mealgrp{border-left:3px solid var(--mc);border-radius:2px;padding-left:11px;margin-top:16px}
+  .mealgrp:first-child{margin-top:4px}
+  .mealgrp .mealhd{margin:0 0 2px;color:var(--mc)}
+  .mealgrp .mealhd .tot{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -652,16 +682,16 @@
       <div class="callout"><span class="ic">PROTOCOLO</span>
         <span>Introduce siempre <b id="cuRef">183 cm y 48 años</b> en la báscula. Mismo día de la semana,
         misma hora, sin haber entrenado ese día.</span></div>
-      <div class="frow">
-        <div class="fld" style="flex:2"><label for="mFecha">Fecha</label><input type="date" id="mFecha"></div>
+      <div class="gridrow" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)">
+        <div class="fld"><label for="mFecha">Fecha</label><input type="date" id="mFecha"></div>
         <div class="fld"><label for="mPeso">Peso (kg)</label><input type="text" inputmode="decimal" id="mPeso" placeholder="98,9"></div>
       </div>
-      <div class="frow" style="margin-top:8px">
+      <div class="gridrow" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:8px">
         <div class="fld"><label for="mPct">Grasa %</label><input type="text" inputmode="decimal" id="mPct" placeholder="28,4"></div>
         <div class="fld"><label for="mMg">M. grasa</label><input type="text" inputmode="decimal" id="mMg" placeholder="28,0"></div>
         <div class="fld"><label for="mMm">M. magra</label><input type="text" inputmode="decimal" id="mMm" placeholder="70,9"></div>
       </div>
-      <div class="frow" style="margin-top:8px">
+      <div class="gridrow" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:8px">
         <div class="fld"><label for="mAlt">Altura báscula</label><input type="text" inputmode="numeric" id="mAlt" placeholder="183"></div>
         <div class="fld"><label for="mEdad">Edad báscula</label><input type="text" inputmode="numeric" id="mEdad" placeholder="48"></div>
         <div class="fld"><label for="mCint">Cintura (cm)</label><input type="text" inputmode="decimal" id="mCint" placeholder="—"></div>
@@ -677,10 +707,10 @@
       <h3>Cintura</h3>
       <p class="sub">A la altura del ombligo, al levantarte, una vez por semana. El indicador más fiable que tienes.</p>
       <svg class="chart" id="chCintura" viewBox="0 0 320 140" role="img" aria-label="Cintura"></svg>
-      <div class="frow" style="margin-top:10px">
+      <div class="gridrow wai" style="margin-top:10px">
         <div class="fld"><label for="cFecha">Fecha</label><input type="date" id="cFecha"></div>
         <div class="fld"><label for="cCm">Cintura (cm)</label><input type="text" inputmode="decimal" id="cCm" placeholder="104,0"></div>
-        <button class="btn go" id="cSave" style="height:42px">Añadir</button>
+        <button class="btn go mini" id="cSave">Añadir</button>
       </div>
     </div>
 
@@ -709,9 +739,9 @@
   <!-- COMIDA -->
   <section id="viewComida" class="hidden">
     <div class="panel">
-      <div class="frow" style="margin-bottom:12px">
-        <div class="fld" style="flex:2"><label for="dFecha">Día</label><input type="date" id="dFecha"></div>
-        <button class="btn" id="dCopy" style="height:42px">Copiar día anterior</button>
+      <div class="gridrow day" style="margin-bottom:14px">
+        <div class="fld"><label for="dFecha">Día</label><input type="date" id="dFecha"></div>
+        <button class="btn mini" id="dCopy">Copiar ayer</button>
       </div>
       <div id="dMeters"></div>
       <div id="dVerdict"></div>
@@ -725,11 +755,11 @@
         <button type="button" data-cat="cena">Cena</button>
         <button type="button" data-cat="otros">Otros</button>
       </div>
-      <div class="frow">
-        <div class="fld" style="flex:3"><label for="dAlim">Alimento</label><select id="dAlim"></select></div>
-        <div class="fld" style="max-width:100px"><label id="dUnLab" for="dCant">Gramos</label>
+      <div class="gridrow add">
+        <div class="fld"><label for="dAlim">Alimento</label><select id="dAlim"></select></div>
+        <div class="fld"><label id="dUnLab" for="dCant">Gramos</label>
           <input type="text" inputmode="decimal" id="dCant" placeholder="100"></div>
-        <button class="btn go" id="dAdd" style="height:42px;flex:0 0 auto;width:52px;padding:0">+</button>
+        <button class="btn go mini plus" id="dAdd" aria-label="Añadir alimento">+</button>
       </div>
       <div class="chips" id="dChips" style="padding-top:10px"></div>
     </div>
@@ -741,11 +771,11 @@
 
     <div class="panel">
       <h3>Objetivos</h3>
-      <div class="frow">
+      <div class="gridrow" style="grid-template-columns:repeat(2,minmax(0,1fr))">
         <div class="fld"><label for="oKcal">kcal / día</label><input type="text" inputmode="numeric" id="oKcal"></div>
         <div class="fld"><label for="oProt">Proteína g</label><input type="text" inputmode="numeric" id="oProt"></div>
       </div>
-      <div class="frow" style="margin-top:8px">
+      <div class="gridrow" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:8px">
         <div class="fld"><label for="oCarb">Carbos g</label><input type="text" inputmode="numeric" id="oCarb"></div>
         <div class="fld"><label for="oFat">Grasa g</label><input type="text" inputmode="numeric" id="oFat"></div>
         <div class="fld"><label for="oAlt">Altura ref.</label><input type="text" inputmode="numeric" id="oAlt"></div>
@@ -756,12 +786,12 @@
     <div class="panel">
       <h3>Mis alimentos</h3>
       <p class="sub">Añade lo que comes de verdad, o corrige los macros de la lista.</p>
-      <div class="frow">
-        <div class="fld" style="flex:2"><label for="nNom">Nombre</label><input type="text" id="nNom" placeholder="Tortilla de patata"></div>
+      <div class="gridrow" style="grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)">
+        <div class="fld"><label for="nNom">Nombre</label><input type="text" id="nNom" placeholder="Tortilla de patata"></div>
         <div class="fld"><label for="nUn">Unidad</label><select id="nUn">
           <option value="g">por 100 g</option><option value="ud">por unidad</option></select></div>
       </div>
-      <div class="frow" style="margin-top:8px">
+      <div class="gridrow" style="grid-template-columns:repeat(4,minmax(0,1fr));margin-top:8px">
         <div class="fld"><label for="nKcal">kcal</label><input type="text" inputmode="decimal" id="nKcal"></div>
         <div class="fld"><label for="nProt">Prot.</label><input type="text" inputmode="decimal" id="nProt"></div>
         <div class="fld"><label for="nCarb">Carbos</label><input type="text" inputmode="decimal" id="nCarb"></div>
@@ -1829,8 +1859,7 @@ $("#fileIn").addEventListener("change", e=>{
       if(!d || typeof d !== "object" || !d.log) throw new Error("bad file");
       S = Object.assign(blank(), d);
       if(!S.body) S.body = {kg:70, met:5};
-      // Recargar deja que corran TODAS las migraciones sobre la copia importada,
-      // incluidas las de composición corporal y dieta.
+      // Recargar deja que corran TODAS las migraciones sobre la copia importada.
       save(); location.reload();
     }catch(err){
       ask("Import failed", "That file could not be read as a backup.", "OK", false);
@@ -1865,8 +1894,22 @@ boot();
 
 /* Offline support — only when served over http(s); skipped for file:// */
 if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
+  /* Autoactualización. Sin esto, la copia guardada se sirve indefinidamente y la
+     única salida aparente es borrar los datos del sitio — que se lleva por delante
+     todo el historial. Aquí se busca versión nueva al abrir y cada hora, y la
+     página se recarga sola una vez cuando el service worker nuevo toma el control. */
+  const teniaControl = !!navigator.serviceWorker.controller;
+  let recargando = false;
+  navigator.serviceWorker.addEventListener("controllerchange", ()=>{
+    if(!teniaControl || recargando) return;   // en la primera instalación no recarga
+    recargando = true;
+    location.reload();
+  });
   window.addEventListener("load", ()=>{
-    navigator.serviceWorker.register("sw.js").catch(()=>{});
+    navigator.serviceWorker.register("sw.js").then(reg=>{
+      reg.update();
+      setInterval(()=>{ reg.update(); }, 3600000);
+    }).catch(()=>{});
   });
 }
 
@@ -2162,8 +2205,10 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
   }
   function renderComidaV(){
     $("#dFecha").value = st.dia;
-    Array.prototype.forEach.call($("#dCat").children, b=>
-      b.setAttribute("aria-pressed", String(b.dataset.cat===st.cat)));
+    Array.prototype.forEach.call($("#dCat").children, b=>{
+      b.setAttribute("aria-pressed", String(b.dataset.cat===st.cat));
+      b.style.setProperty("--mc", "var(--m-"+b.dataset.cat+")");
+    });
 
     const t = tot(st.dia), O = S.obj;
     const M = [["Calorías", t.kcal, n(O.kcal)||2050, "kcal", "var(--ink-2)"],
@@ -2208,13 +2253,14 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
         const idx = items.map((it,i)=>[it,i]).filter(x=>(x[0].cat||"otros")===c[0]);
         if(!idx.length) return;
         const s = tot(st.dia, c[0]);
-        h += '<div class="mealhd">'+c[1].toUpperCase()+'<span class="tot">'+Math.round(s.kcal)+' kcal · '+
+        h += '<div class="mealgrp" style="--mc:var(--m-'+c[0]+')">'+
+          '<div class="mealhd">'+c[1].toUpperCase()+'<span class="tot">'+Math.round(s.kcal)+' kcal · '+
           Math.round(s.prot)+' P · '+Math.round(s.carb)+' C · '+Math.round(s.fat)+' G</span></div>';
         h += idx.map(x=>'<div class="frw"><span class="nm">'+esc(x[0].n)+'</span>'+
           '<span class="qt">'+f(x[0].cant,0)+(x[0].u==="ud"?" ud":" g")+'</span>'+
           '<span class="mc">'+Math.round(x[0].kcal)+' kcal · '+f(x[0].prot,0)+'P · '+
           f(x[0].carb,0)+'C · '+f(x[0].fat,0)+'G</span>'+
-          '<button class="x" data-delfood="'+x[1]+'" aria-label="Borrar">×</button></div>').join("");
+          '<button class="x" data-delfood="'+x[1]+'" aria-label="Borrar">×</button></div>').join("") + '</div>';
       });
       $("#dList").innerHTML = h;
     }
