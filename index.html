@@ -529,6 +529,26 @@
   .mealgrp:first-child{margin-top:4px}
   .mealgrp .mealhd{margin:0 0 2px;color:var(--mc)}
   .mealgrp .mealhd .tot{color:var(--muted)}
+
+  /* ---- series por fase ---- */
+  .sertag{font-size:11.5px;font-weight:600;color:var(--series-1);margin:1px 0 7px;line-height:1.3}
+  .sertag b{font-weight:750}
+  .sertag.rir{color:var(--series-2)}
+  .faserow{display:flex;align-items:center;gap:8px;margin:12px 0 0}
+  .faserow label{font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--muted);flex:0 0 auto}
+  .faserow select{flex:1;margin:0;height:38px;padding:0 30px 0 11px;font-size:13px;font-weight:600}
+  /* ---- día de campo ---- */
+  .camporow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;
+    background:var(--surface-2);margin-bottom:14px;font-size:13.5px;font-weight:600;cursor:pointer}
+  .camporow input{width:auto;height:auto;margin:0;flex:0 0 auto;transform:scale(1.2)}
+  .camporow .hint{margin-left:auto;font-size:11.5px;font-weight:500;color:var(--muted);
+    font-variant-numeric:tabular-nums;white-space:nowrap}
+  .objgrid{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center}
+  .objgrid .h{font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--muted);text-align:center}
+  .objgrid .rl{font-size:12.5px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+  .objgrid input{width:100%;height:40px;border-radius:11px;border:1px solid var(--line);
+    background:var(--surface-2);color:var(--ink);font:inherit;font-size:14px;text-align:center;
+    font-variant-numeric:tabular-nums;padding:0 4px;min-width:0}
 </style>
 </head>
 <body>
@@ -560,7 +580,15 @@
       Download the file and open it in your browser (or add it to your home screen) instead.
     </p>
     <div class="dayseg" id="daySeg"></div>
-    <p class="protocol">1 serie al fallo · negativa de 5 s en cada repetición</p>
+    <div class="faserow">
+      <label for="faseSel">FASE</label>
+      <select id="faseSel">
+        <option value="1">Semanas 1–3 · 2 series multi / 1 aislado</option>
+        <option value="2">Semanas 4–6 · 2 / 2</option>
+        <option value="3">Semana 7+ · 3 / 2</option>
+      </select>
+    </div>
+    <p class="protocol">Solo la última serie cerca del fallo · previas a 2 RIR · excéntrica 2–3 s</p>
 
     <div class="timerbar" id="timerBar">
       <div class="tmain">
@@ -743,6 +771,10 @@
         <div class="fld"><label for="dFecha">Día</label><input type="date" id="dFecha"></div>
         <button class="btn mini" id="dCopy">Copiar ayer</button>
       </div>
+      <label class="camporow" for="dCampo">
+        <input type="checkbox" id="dCampo"> Día de campo
+        <span class="hint" id="dCampoHint"></span>
+      </label>
       <div id="dMeters"></div>
       <div id="dVerdict"></div>
     </div>
@@ -771,14 +803,24 @@
 
     <div class="panel">
       <h3>Objetivos</h3>
-      <div class="gridrow" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-        <div class="fld"><label for="oKcal">kcal / día</label><input type="text" inputmode="numeric" id="oKcal"></div>
-        <div class="fld"><label for="oProt">Proteína g</label><input type="text" inputmode="numeric" id="oProt"></div>
+      <div class="objgrid">
+        <span></span><span class="h">NORMAL</span><span class="h">DÍA DE CAMPO</span>
+        <span class="rl">kcal</span>
+        <input type="text" inputmode="numeric" id="oKcal" aria-label="kcal día normal">
+        <input type="text" inputmode="numeric" id="oKcalC" aria-label="kcal día de campo">
+        <span class="rl">Proteína g</span>
+        <input type="text" inputmode="numeric" id="oProt" aria-label="Proteína día normal">
+        <input type="text" inputmode="numeric" id="oProtC" aria-label="Proteína día de campo">
+        <span class="rl">Carbos g</span>
+        <input type="text" inputmode="numeric" id="oCarb" aria-label="Carbohidratos día normal">
+        <input type="text" inputmode="numeric" id="oCarbC" aria-label="Carbohidratos día de campo">
+        <span class="rl">Grasa g</span>
+        <input type="text" inputmode="numeric" id="oFat" aria-label="Grasa día normal">
+        <input type="text" inputmode="numeric" id="oFatC" aria-label="Grasa día de campo">
       </div>
-      <div class="gridrow" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:8px">
-        <div class="fld"><label for="oCarb">Carbos g</label><input type="text" inputmode="numeric" id="oCarb"></div>
-        <div class="fld"><label for="oFat">Grasa g</label><input type="text" inputmode="numeric" id="oFat"></div>
-        <div class="fld"><label for="oAlt">Altura ref.</label><input type="text" inputmode="numeric" id="oAlt"></div>
+      <div class="gridrow" style="grid-template-columns:minmax(0,1fr) minmax(0,2fr);margin-top:10px">
+        <div class="fld"><label for="oAlt">Altura ref. cm</label><input type="text" inputmode="numeric" id="oAlt"></div>
+        <span></span>
       </div>
       <div class="actions" style="margin-top:12px"><button class="btn go" id="oSave">Guardar objetivos</button></div>
     </div>
@@ -1373,6 +1415,7 @@ function renderList(){
         <div class="thumb">${thumb(e.a, e.n, i)}</div>
         <div class="meta">
           <p class="name">${fin?'<span class="cdone">✓</span>':""}${e.n} <span class="en">${e.e}</span></p>
+          ${seriesTag(e.id)}
           <div class="fields">
             <div class="field">
               <label for="w-${e.id}">Weight (${S.unit})</label>
@@ -1450,6 +1493,24 @@ function showTip(evt, text){
 document.addEventListener("scroll", ()=>tip.classList.remove("on"), true);
 
 const SVGNS = "http://www.w3.org/2000/svg";
+
+/* ---- Volumen por fase. Multiarticulares y aislados llevan series distintas,
+   y solo la ultima serie de cada ejercicio va cerca del fallo. ---- */
+const MULTI = {squat:1, bench:1, hipthrust:1, pullup:1, cablerow:1, ohp:1};
+const FASES = [{multi:2, aisl:1}, {multi:2, aisl:2}, {multi:3, aisl:2}];
+function faseActual(){
+  const i = (parseInt(S.fase, 10) || 1) - 1;
+  return FASES[(i >= 0 && i < FASES.length) ? i : 0];
+}
+function seriesTag(id){
+  const f = faseActual();
+  const n = MULTI[id] ? f.multi : f.aisl;
+  if(id === "adductor")
+    return '<p class="sertag rir">' + n + (n === 1 ? " serie" : " series") +
+           ' &middot; <b>2 RIR fijo</b> mientras siga el tirón</p>';
+  const nota = n > 1 ? "última cerca del fallo, previas a 2 RIR" : "cerca del fallo";
+  return '<p class="sertag"><b>' + n + (n === 1 ? " serie" : " series") + '</b> &middot; ' + nota + '</p>';
+}
 function el(name, attrs, txt){
   const n = document.createElementNS(SVGNS, name);
   for(const k in attrs) n.setAttribute(k, attrs[k]);
@@ -1950,7 +2011,9 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
     ["Vino tinto (copa)","ud",120,0.1,4,0]
   ].map((a,i)=>({id:"a"+i, n:a[0], u:a[1], kcal:a[2], prot:a[3], carb:a[4], fat:a[5]}));
 
-  const OBJ_DEF = {kcal:2050, prot:170, carb:170, fat:75, alt:183, edad:48};
+  const OBJ_DEF = {kcal:2150, prot:180, carb:195, fat:75,
+                   kcalC:2600, protC:180, carbC:290, fatC:80,
+                   alt:183, edad:48, plan:"2026-09"};
   const CATS = [["desayuno","Desayuno"],["comida","Comida"],["cena","Cena"],["otros","Otros"]];
 
   /* ---------- migración v3 -> v4 ---------- */
@@ -1960,6 +2023,10 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
   if(!S.alimentos) S.alimentos = SEED_AL.map(a=>Object.assign({},a));
   if(!S.favs)      S.favs      = [];
   S.obj = Object.assign({}, OBJ_DEF, S.obj || {});
+  if(S.obj.plan !== "2026-09"){            // sube del plan viejo al acordado en septiembre
+    ["kcal","prot","carb","fat","kcalC","protC","carbC","fatC"].forEach(k=>{ S.obj[k] = OBJ_DEF[k]; });
+    S.obj.plan = "2026-09";
+  }
   (function(){                        // recupera alimentos de la semilla que falten
     const has = {}; S.alimentos.forEach(a=>has[a.id]=true);
     SEED_AL.forEach(a=>{ if(!has[a.id]) S.alimentos.push(Object.assign({},a)); });
@@ -2165,7 +2232,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
     if(V.length>=2){
       const l=V[V.length-1], fi=V[0], sem=dif(fi.fecha,l.fecha)/7, ritmo=(l.peso-fi.peso)/sem;
       const dd = Object.keys(S.dieta).filter(k=>tot(k).kcal>500);
-      const kO = n(S.obj.kcal)||2050;
+      const kO = n(S.obj.kcal)||2150;
       const ing = dd.length>=5 ? dd.reduce((s,d)=>s+tot(d).kcal,0)/dd.length : kO;
       const fuente = dd.length>=5 ? dd.length+" días registrados" : "tu objetivo de "+kO+" kcal (aún sin días suficientes)";
       const tdee = ing - (ritmo*7700/7);
@@ -2198,6 +2265,14 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
 
   /* ---------- COMIDA ---------- */
   function dia(d){ return S.dieta[d] || {items:[]}; }
+  function esCampo(d){ return !!(S.dieta[d] && S.dieta[d].campo); }
+  /* Objetivos del día: los de campo cuando toca jornada de campo. */
+  function objDia(d){
+    const O = S.obj;
+    return esCampo(d)
+      ? {kcal:n(O.kcalC)||2600, prot:n(O.protC)||180, carb:n(O.carbC)||290, fat:n(O.fatC)||80}
+      : {kcal:n(O.kcal) ||2150, prot:n(O.prot) ||180, carb:n(O.carb) ||195, fat:n(O.fat) ||75};
+  }
   function tot(d, cat){
     return dia(d).items.filter(i=>!cat || (i.cat||"otros")===cat)
       .reduce((t,i)=>({kcal:t.kcal+(i.kcal||0), prot:t.prot+(i.prot||0),
@@ -2210,11 +2285,13 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
       b.style.setProperty("--mc", "var(--m-"+b.dataset.cat+")");
     });
 
-    const t = tot(st.dia), O = S.obj;
-    const M = [["Calorías", t.kcal, n(O.kcal)||2050, "kcal", "var(--ink-2)"],
-               ["Proteína", t.prot, n(O.prot)||170, "g", "var(--series-1)"],
-               ["Carbohidratos", t.carb, n(O.carb)||170, "g", "var(--muted)"],
-               ["Grasa", t.fat, n(O.fat)||75, "g", "var(--series-2)"]];
+    const t = tot(st.dia), G = objDia(st.dia);
+    $("#dCampo").checked = esCampo(st.dia);
+    $("#dCampoHint").textContent = G.kcal.toLocaleString("es-ES")+" kcal · "+G.prot+" g P";
+    const M = [["Calorías", t.kcal, G.kcal, "kcal", "var(--ink-2)"],
+               ["Proteína", t.prot, G.prot, "g", "var(--series-1)"],
+               ["Carbohidratos", t.carb, G.carb, "g", "var(--muted)"],
+               ["Grasa", t.fat, G.fat, "g", "var(--series-2)"]];
     $("#dMeters").innerHTML = M.map(m=>
       '<div class="meter"><div class="mhd"><span class="nm">'+m[0].toUpperCase()+'</span>'+
       '<span class="vv">'+Math.round(m[1]).toLocaleString("es-ES")+'</span>'+
@@ -2225,7 +2302,7 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
     let v = "";
     if(t.kcal>0){
       const gkg = t.prot/peso;
-      if(t.prot >= (n(O.prot)||170)*0.95) v = call("ok","BIEN", f(gkg,2)+" g de proteína por kg. En objetivo.");
+      if(t.prot >= G.prot*0.95) v = call("ok","BIEN", f(gkg,2)+" g de proteína por kg. En objetivo.");
       else if(t.prot >= peso*1.6)         v = call("ok","OK", f(gkg,2)+" g/kg. Por encima del mínimo de 1,6 g/kg.");
       else v = call("warn","OJO","Solo "+f(gkg,2)+" g/kg. Te faltan ~"+Math.round(peso*1.6-t.prot)+" g para el mínimo de 1,6.");
       const ce = tot(st.dia,"cena");
@@ -2265,9 +2342,11 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
       $("#dList").innerHTML = h;
     }
 
-    ["kcal","prot","carb","fat","alt"].forEach((k,i)=>{
-      const box = $(["#oKcal","#oProt","#oCarb","#oFat","#oAlt"][i]);
-      if(document.activeElement !== box) box.value = S.obj[k];
+    [["#oKcal","kcal"],["#oProt","prot"],["#oCarb","carb"],["#oFat","fat"],
+     ["#oKcalC","kcalC"],["#oProtC","protC"],["#oCarbC","carbC"],["#oFatC","fatC"],
+     ["#oAlt","alt"]].forEach(pr=>{
+      const box = $(pr[0]);
+      if(box && document.activeElement !== box) box.value = S.obj[pr[1]];
     });
     fman();
   }
@@ -2378,9 +2457,20 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
     const d = dia(st.dia); d.items.splice(+i,1); S.dieta[st.dia]=d; save(); renderComidaV();
   });
   $("#oSave").addEventListener("click", ()=>{
-    [["#oKcal","kcal"],["#oProt","prot"],["#oCarb","carb"],["#oFat","fat"],["#oAlt","alt"]]
-      .forEach(p=>{ const v=n($(p[0]).value); if(isFinite(v)) S.obj[p[1]]=v; });
+    [["#oKcal","kcal"],["#oProt","prot"],["#oCarb","carb"],["#oFat","fat"],
+     ["#oKcalC","kcalC"],["#oProtC","protC"],["#oCarbC","carbC"],["#oFatC","fatC"],
+     ["#oAlt","alt"]].forEach(pr=>{ const v=n($(pr[0]).value); if(isFinite(v)) S.obj[pr[1]]=v; });
     save(); renderComidaV(); renderCuerpo();
+  });
+  $("#dCampo").addEventListener("change", e=>{
+    const d = dia(st.dia); d.campo = e.target.checked;
+    S.dieta[st.dia] = d; save(); renderComidaV(); renderCuerpo();
+  });
+  /* selector de fase del plan de volumen */
+  $("#faseSel").value = String(S.fase || 1);
+  $("#faseSel").addEventListener("change", e=>{
+    S.fase = parseInt(e.target.value, 10) || 1;
+    save(); renderList();
   });
   $("#nAdd").addEventListener("click", ()=>{
     const nm = $("#nNom").value.trim();
