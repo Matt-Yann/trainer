@@ -418,6 +418,51 @@
   .hidden{display:none !important}
   .foot{font-size:11px;color:var(--muted);text-align:center;margin:20px 0 0;line-height:1.6}
   .foot a{color:var(--ink-2)}
+  .hint{margin:8px 0 0;font-size:11.5px;font-weight:650;line-height:1.35}
+  .hint.up{color:var(--good)}
+  .hint.down{color:var(--series-2)}
+  .card.aqui,
+  .card:focus-within{border-color:var(--series-1);box-shadow:0 0 0 1px var(--series-1)}
+  .endrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:stretch;margin-top:10px}
+  .endrow .gfin{margin:0}
+  .endcount{display:flex;align-items:center;justify-content:center;gap:5px;
+    border:1px solid var(--line);border-radius:12px;background:var(--surface);
+    font-size:13px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+  .endcount b{font-size:19px;font-weight:750;color:var(--ink)}
+  .endcount span{font-size:11px}
+  .endcount.full{border-color:transparent;background:color-mix(in srgb, var(--good) 14%, var(--surface))}
+  .endcount.full b{color:var(--good)}
+  #monthSel{display:none}            /* el mes sale de la semana elegida */
+  #weekSel{flex:1 1 auto;font-size:14px;padding:0 26px 0 14px}
+
+  /* ---------- una fila por serie ---------- */
+  .sets{display:flex;flex-direction:column;gap:6px;margin-top:9px}
+  .srow{display:grid;grid-template-columns:86px minmax(0,1fr) minmax(0,1fr) 40px;
+    gap:6px;align-items:center}
+  .srow .snum{font-size:11.5px;font-weight:750;color:var(--muted);letter-spacing:.02em;
+    white-space:nowrap}
+  .srow .snum i{font-style:normal;font-weight:700}
+  .srow .snum i.fallo{color:var(--series-2)}
+  .srow input{width:100%;height:40px;border-radius:10px;border:1px solid var(--line);
+    background:var(--surface-2);color:var(--ink);font:inherit;font-size:15px;font-weight:650;
+    text-align:center;padding:0 3px;min-width:0;font-variant-numeric:tabular-nums;
+    -moz-appearance:textfield}
+  .srow input::-webkit-outer-spin-button,
+  .srow input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .srow input:focus{outline:none;border-color:var(--series-1);box-shadow:0 0 0 1px var(--series-1)}
+  .srow input.mark-up, .srow input.mark-up:focus{
+    border-color:var(--good);box-shadow:0 0 0 1px var(--good)}
+  .srow input.mark-down, .srow input.mark-down:focus{
+    border-color:var(--series-2);box-shadow:0 0 0 1px var(--series-2)}
+  .srow .srest{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);
+    background:var(--surface-2);color:var(--ink-2);font:inherit;font-size:19px;line-height:1;
+    padding:0;cursor:pointer}
+  .srow .srest.ph{border:0;background:none;cursor:default}
+  @media (max-width:360px){
+    .srow{grid-template-columns:76px minmax(0,1fr) minmax(0,1fr) 38px;gap:5px}
+    .srow .snum{font-size:10.5px}
+    .srow .srest{width:38px;height:38px;font-size:17px}
+  }
 
   /* ================= Cuerpo & Comida ================= */
   .tabs .tab{font-size:13.5px;font-weight:640;padding:0 2px}
@@ -562,12 +607,7 @@
   </div>
   <div class="setrow" id="setrow">
     <select class="sel" id="monthSel" aria-label="Select month"></select>
-    <select class="sel" id="weekSel" aria-label="Select week">
-      <option value="1">Week 1</option>
-      <option value="2">Week 2</option>
-      <option value="3">Week 3</option>
-      <option value="4">Week 4</option>
-    </select>
+    <select class="sel" id="weekSel" aria-label="Semana y series"></select>
     <button class="iconbtn" id="themeBtn" aria-label="Switch theme">◐</button>
   </div>
 </header>
@@ -580,19 +620,11 @@
       Download the file and open it in your browser (or add it to your home screen) instead.
     </p>
     <div class="dayseg" id="daySeg"></div>
-    <div class="faserow">
-      <label for="faseSel">FASE</label>
-      <select id="faseSel">
-        <option value="1">Semanas 1–3 · 2 series multi / 1 aislado</option>
-        <option value="2">Semanas 4–6 · 2 / 2</option>
-        <option value="3">Semana 7+ · 3 / 2</option>
-      </select>
-    </div>
-    <p class="protocol">Solo la última serie cerca del fallo · previas a 2 RIR · excéntrica 2–3 s</p>
+    <p class="protocol" id="protocolo"></p>
 
     <div class="timerbar" id="timerBar">
       <div class="tmain">
-        <span class="tlabel" id="tLabel">Sesión · Week 1</span>
+        <span class="tlabel" id="tLabel">Sesión · Semana 1 · Día 1</span>
         <b class="tval" id="tGlobal">0:00</b>
       </div>
       <button class="tbtn" id="tToggle">Empezar</button>
@@ -600,10 +632,6 @@
       <button class="tsmall" id="tReset" aria-label="Reiniciar cronómetro">↺</button>
     </div>
 
-    <div class="weekbar">
-      <div class="track"><i id="progFill" style="width:0%"></i></div>
-      <b id="progTxt">0 / 0 logged</b>
-    </div>
     <div id="list"></div>
     <p class="foot">Tap a field and type. Everything saves on this device automatically.<br>
       Illustrations by <a href="https://github.com/everkinetic/data" target="_blank" rel="noopener">Everkinetic</a>,
@@ -943,10 +971,9 @@ function thumb(key, name, i){
    2. PROGRAM
    ============================================================ */
 const GROUPS = [
-  {id:"warmup", short:"Calentamiento", chart:"Calentamiento",
-   name:"Calentamiento · Warm-up", note:"Cinta, bici o movilidad · 5–10 min", noEx:true},
   {id:"b1", short:"Piernas y pecho",   chart:"Bloque 1",
-   name:"Piernas (cuádriceps) y pecho · Quads & chest"},
+   name:"Piernas (cuádriceps) y pecho · Quads & chest",
+   note:"Calentamiento primero: cinta, bici o movilidad · 5–10 min. Cuenta dentro de este bloque."},
   {id:"b2", short:"Cadera y gemelos",  chart:"Bloque 2",
    name:"Cadera, glúteos, ingles y gemelos · Hips, glutes & calves"},
   {id:"b3", short:"Espalda y hombros", chart:"Bloque 3",
@@ -1095,7 +1122,7 @@ function prevField(w, d, id, field){
   }
   return null;
 }
-const vol = (c) => (c.w && c.r) ? c.w * c.r : 0;
+const vol = (c) => (c.w||0)*(c.r||0) + (c.w2||0)*(c.r2||0) + (c.w3||0)*(c.r3||0);
 const fmt = (n) => {
   if(!isFinite(n)) return "0";
   if(n >= 100000) return (n/1000).toFixed(0)+"k";
@@ -1208,12 +1235,14 @@ document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) tick();
 
 function restOver(){
   beep(3); buzz([220,110,220,110,320]);
+  const t = TM();
   const sheet = $("#restSheet");
   sheet.classList.add("done");
   $("#rLabel").textContent = "Descanso terminado";
   $("#rVal").textContent = "¡Vamos!";
-  const nx = GROUPS.find(g=>g.id === TM().act);
-  $("#rNext").textContent = nx ? "Siguiente: " + nx.short : "";
+  const nx = GROUPS.find(g=>g.id === t.act);
+  $("#rNext").textContent = t.restLabel ? (t.restNext || "") : (nx ? "Siguiente: " + nx.short : "");
+  t.restLabel = null; t.restNext = null;
   setTimeout(()=>{ sheet.classList.remove("done"); paintTimers(); }, 3200);
   save();
 }
@@ -1221,13 +1250,15 @@ function restOver(){
 /* Turn the greyed pre-filled numbers of one block into real logged sets. */
 function commitBlock(id){
   EX.filter(e => e.g === id).forEach(e=>{
-    const c = cell(S.week, S.sess, e.id);
-    if(c.w != null && c.r != null) return;                 // already logged
-    const wi = document.getElementById("w-" + e.id);
-    const ri = document.getElementById("r-" + e.id);
-    if(!wi || !ri || wi.value === "" || ri.value === "") return;
-    setCell(S.week, S.sess, e.id, "w", parseFloat(wi.value));
-    setCell(S.week, S.sess, e.id, "r", parseFloat(ri.value));
+    const n = setsFor(e.id);
+    for(let s = 0; s < n; s++){
+      if(setDone(cell(S.week, S.sess, e.id), s)) continue;
+      const wi = document.getElementById("w-" + e.id + "-" + s);
+      const ri = document.getElementById("r-" + e.id + "-" + s);
+      if(!wi || !ri || wi.value === "" || ri.value === "") continue;
+      setCell(S.week, S.sess, e.id, SET_KEYS[s][0], parseFloat(wi.value));
+      setCell(S.week, S.sess, e.id, SET_KEYS[s][1], parseFloat(ri.value));
+    }
   });
 }
 
@@ -1241,11 +1272,58 @@ function finishBlock(id){
   t.act = next;
   if(next){
     t.rest = REST_MS;
+    t.restLabel = null; t.restNext = null;
   } else {
     t.rest = 0; t.run = false; t.over = true;
     beep(4); buzz([300,120,300,120,500]);
   }
   save(); renderDaySeg(); renderList(); paintTimers();
+}
+
+/* Cerrar la sesión cierra TODO: no encadena con otro descanso. */
+function cierraSesion(){
+  const t = TM();
+  markToday();
+  GROUPS.forEach(g=>{
+    commitBlock(g.id);
+    if(t.done.indexOf(g.id) === -1) t.done.push(g.id);
+  });
+  t.act = null; t.rest = 0; t.run = false; t.over = true;
+  t.restLabel = null; t.restNext = null;
+  $("#restSheet").classList.add("hidden");
+  beep(4); buzz([300,120,300,120,500]);
+  save(); renderDaySeg(); renderList(); paintTimers();
+  setTimeout(avanzaDia, 1500);
+}
+function terminarSesion(){
+  const total  = EX.length;
+  const hechos = EX.filter(e => exDone(e.id)).length;
+  if(hechos >= total){ cierraSesion(); return; }
+  ask("La sesión no está completa",
+      "Llevas " + hechos + " de " + total + " ejercicios registrados. " +
+      "Los que falten se quedan sin datos.",
+      "Cerrar igualmente", false)
+    .then(si => { if(si) cierraSesion(); });
+}
+
+function avanzaDia(){
+  tick();
+  const prev = TM(); prev.run = false; prev.last = null;
+  const i = SESS.indexOf(S.sess);
+  if(i < SESS.length - 1){
+    S.sess = SESS[i + 1];
+  } else {                                  // tras el día 3, semana siguiente
+    S.sess = SESS[0];
+    const abs = Math.min(MONTHS * 4, semanaAbs() + 1);
+    S.month = Math.ceil(abs / 4);
+    S.week  = ((abs - 1) % 4) + 1;
+    $("#monthSel").value = String(S.month);
+    pintaSemanas();
+  }
+  const nt = TM(); nt.run = false; nt.last = null;
+  save(); renderDaySeg(); renderList(); paintTimers();
+  if(!$("#viewStats").classList.contains("hidden")) renderStats();
+  window.scrollTo({top:0, behavior:"smooth"});
 }
 
 function toggleTimer(){
@@ -1298,7 +1376,7 @@ function paintTimers(){
   const t = TM();
   const bar = $("#timerBar");
   $("#tLabel").textContent = (t.over ? "Sesión completada · " : "Sesión · ")
-    + "M" + S.month + " · W" + S.week + " · Día " + S.sess;
+    + "Semana " + semanaAbs() + " · Día " + S.sess;
   $("#tGlobal").textContent = clock(t.el);
   bar.classList.toggle("live", t.run && t.rest <= 0);
   const btn = $("#tToggle");
@@ -1325,10 +1403,12 @@ function paintTimers(){
   if(t.rest > 0){
     sheet.classList.remove("hidden");
     if(!sheet.classList.contains("done")){
-      $("#rLabel").textContent = "Descanso entre bloques";
-      $("#rVal").textContent = clock(t.rest);
       const nx = GROUPS.find(g=>g.id === t.act);
-      $("#rNext").textContent = nx ? "Siguiente: " + nx.short : "";
+      $("#rLabel").textContent = t.restLabel || "Descanso entre bloques";
+      $("#rVal").textContent = clock(t.rest);
+      $("#rNext").textContent = t.restLabel
+        ? (t.restNext || "")
+        : (nx ? "Siguiente: " + nx.short : "");
     }
   } else if(!sheet.classList.contains("done")){
     sheet.classList.add("hidden");
@@ -1339,7 +1419,7 @@ $("#tToggle").addEventListener("click", toggleTimer);
 $("#tReset").addEventListener("click", resetTimer);
 $("#tEnd").addEventListener("click", endSession);
 $("#rSkip").addEventListener("click", ()=>{
-  const t = TM(); t.rest = 0;
+  const t = TM(); t.rest = 0; t.restLabel = null; t.restNext = null;
   $("#restSheet").classList.remove("done");
   save(); paintTimers();
 });
@@ -1352,6 +1432,24 @@ $("#rPlus").addEventListener("click", ()=>{
    4. WORKOUT VIEW
    ============================================================ */
 const listEl = $("#list");
+
+/* Ejercicio en el que estás: se marca en azul al tocarlo y se queda marcado
+   hasta que toques otro, para no perder el sitio a media sesión. */
+let exAqui = null;
+function marcaAqui(id){
+  if(!id || exAqui === id) return;
+  exAqui = id;
+  listEl.querySelectorAll(".card").forEach(c =>
+    c.classList.toggle("aqui", c.dataset.card === id));
+}
+listEl.addEventListener("focusin", ev=>{
+  const c = ev.target.closest && ev.target.closest(".card");
+  if(c) marcaAqui(c.dataset.card);
+});
+listEl.addEventListener("pointerdown", ev=>{
+  const c = ev.target.closest && ev.target.closest(".card");
+  if(c) marcaAqui(c.dataset.card);
+});
 
 function renderDaySeg(){
   const box = $("#daySeg");
@@ -1366,7 +1464,7 @@ function renderDaySeg(){
       if(b.dataset.sess === S.sess) return;
       tick();                                  // settle the day we are leaving
       const prev = TM(); prev.run = false; prev.last = null;
-      S.sess = b.dataset.sess;
+      S.sess = b.dataset.sess; exAqui = null;
       const nt = TM(); nt.run = false; nt.last = null;
       save(); renderDaySeg(); renderList();
       if(!$("#viewStats").classList.contains("hidden")) renderStats();
@@ -1375,92 +1473,149 @@ function renderDaySeg(){
 }
 
 /* the little "D1 100×10 · D2 … · D3 …" strip under every exercise */
-function dayStrip(w, id){
-  return `<div class="dayhist">` + SESS.map(d=>{
-    const c = cell(w, d, id);
-    const has = c.w != null && c.r != null;
-    const txt = has ? `${c.w}<span class="x">×</span>${c.r}`
-                    : (c.w != null ? `${c.w}` : "—");
-    return `<span class="dh${d===S.sess?" cur":""}${has?" has":""}">` +
-           `<b>D${d}</b>${txt}</span>`;
-  }).join("") + `</div>`;
+function refrescaAviso(card, id){
+  const c = cell(S.week, S.sess, id);
+  const n = setsFor(id);
+  const hoyHecho = c[SET_KEYS[n - 1][1]] != null;
+  const adv  = hoyHecho ? consejoCarga(id, c) : null;          // lo de hoy
+  const pend = hoyHecho ? null : consejoPendiente(id, S.week, S.sess);  // lo que traes
+
+  card.querySelectorAll("input").forEach(i => i.classList.remove("mark-up", "mark-down"));
+  const vieja = card.querySelector(".hint");
+  if(vieja) vieja.remove();
+
+  let box = null, html = "";
+  if(adv){
+    box = document.getElementById("r-" + id + "-" + (n - 1));   // marca las repeticiones
+    html = hintHTML(id, c);
+  } else if(pend){
+    box = document.getElementById("w-" + id + "-0");            // marca el peso: es lo que cambias
+    const kg = (pend.kg != null && !SIN_CARGA[id]) ? " con " + pend.kg + " " + S.unit : "";
+    html = pend.d === "up"
+      ? '<p class="hint up">▲ ' +
+        (SIN_CARGA[id] ? "Añade lastre o una variante más dura hoy" : "Sube el peso hoy") +
+        ' · la última vez ' + pend.reps + ' reps' + kg + ', techo de ' + pend.r[0] + '–' + pend.r[1] + '</p>'
+      : '<p class="hint down">▼ Baja el peso hoy · la última vez ' + pend.reps +
+        ' reps, por debajo de ' + pend.r[0] + '</p>';
+  }
+  if(box) box.classList.add("mark-" + (adv || pend).d);
+  if(html) card.querySelector(".sets").insertAdjacentHTML("afterend", html);
 }
 
 function renderList(){
+  pintaProtocolo();
   const w = S.week, ses = S.sess;
   const t = TM();
   let html = "";
   GROUPS.forEach(g=>{
     const items = EX.filter(e => e.g === g.id);
-    if(!items.length && !g.noEx) return;
+    if(!items.length) return;
     const fin = t.done.indexOf(g.id) !== -1;
-    html += `<div class="group${g.noEx?" warm":""}"><div class="ghead">` +
+    html += `<div class="group"><div class="ghead">` +
       `<h2>${g.short}<small>${g.name.split(" · ")[1]}</small></h2>` +
       `<span class="gtime" id="gt-${g.id}">${clock(t.bl[g.id] || 0)}</span></div>`;
 
-    if(g.noEx){
+    if(g.note){
       html += `<p class="warmnote">${g.note}</p>`;
     }
     items.forEach((e, i)=>{
       const c = cell(w, ses, e.id);
-      const done = c.w != null && c.r != null;
+      const nSets = setsFor(e.id);
+      const done = exDone(e.id);
       const pw = c.w != null ? null : prevField(w, ses, e.id, "w");
       const pr = c.r != null ? null : prevField(w, ses, e.id, "r");
-      const vw = c.w != null ? c.w : (pw ? pw.v : "");
-      const vr = c.r != null ? c.r : (pr ? pr.v : "");
       const src = pw || pr;
       const carried = !done && !!src;
+      let rows = "";
+      for(let sx = 0; sx < nSets; sx++){
+        const kw = SET_KEYS[sx][0], kr = SET_KEYS[sx][1];
+        let vw = c[kw] != null ? c[kw] : "";
+        let vr = c[kr] != null ? c[kr] : "";
+        if(sx === 0){
+          if(vw === "" && pw) vw = pw.v;
+          if(vr === "" && pr) vr = pr.v;
+        } else if(vw === "" && c.w != null){
+          vw = c.w;                                  // mismo peso que la serie 1
+        }
+        const last  = sx === nSets - 1;
+        const fallo = last && e.id !== "adductor";   // aductores nunca al fallo
+        rows += `
+            <div class="srow${setDone(c, sx)?" ok":""}">
+              <span class="snum">S${sx+1} <i class="${fallo?"fallo":""}">(${fallo?"al fallo":"2 RIR"})</i></span>
+              <input id="w-${e.id}-${sx}" type="number" inputmode="decimal" step="0.5" min="0"
+                     aria-label="Peso serie ${sx+1}" placeholder="${S.unit}" value="${vw}"
+                     data-ex="${e.id}" data-f="${kw}" data-set="${sx}">
+              <input id="r-${e.id}-${sx}" type="number" inputmode="numeric" step="1" min="0"
+                     aria-label="Repeticiones serie ${sx+1}" placeholder="reps" value="${vr}"
+                     data-ex="${e.id}" data-f="${kr}" data-set="${sx}">
+              ${last ? '<span class="srest ph"></span>'
+                     : `<button class="srest" data-rest="${e.id}" data-set="${sx}"
+                          aria-label="Descanso antes de la serie ${sx+2}">⏱</button>`}
+            </div>`;
+      }
       html += `
-      <div class="card${done?" done":""}${fin?" blockdone":""}${carried?" carried":""}" data-card="${e.id}">
+      <div class="card${done?" done":""}${fin?" blockdone":""}${carried?" carried":""}${e.id===exAqui?" aqui":""}" data-card="${e.id}">
         <div class="thumb">${thumb(e.a, e.n, i)}</div>
         <div class="meta">
           <p class="name">${fin?'<span class="cdone">✓</span>':""}${e.n} <span class="en">${e.e}</span></p>
-          ${seriesTag(e.id)}
-          <div class="fields">
-            <div class="field">
-              <label for="w-${e.id}">Weight (${S.unit})</label>
-              <input id="w-${e.id}" type="number" inputmode="decimal" step="0.5" min="0"
-                     placeholder="—" value="${vw}" data-ex="${e.id}" data-f="w">
-            </div>
-            <div class="field">
-              <label for="r-${e.id}">Reps</label>
-              <input id="r-${e.id}" type="number" inputmode="numeric" step="1" min="0"
-                     placeholder="—" value="${vr}" data-ex="${e.id}" data-f="r">
-            </div>
-          </div>
-          ${carried ? `<p class="carrytag">Copiado de M${src.m} · W${src.w} · D${src.d}</p>` : ""}
-          ${dayStrip(w, e.id)}
+          <div class="sets">${rows}</div>
+          ${carried ? `<p class="carrytag">Copiado de Semana ${semanaAbs(src.m, src.w)} · Día ${src.d}</p>` : ""}
         </div>
       </div>`;
     });
     if(fin){
       html += `<div class="gfin gfin-done" id="gf-${g.id}">✓ Bloque terminado · ${clock(t.bl[g.id] || 0)}</div>`;
     } else if(!t.over){
-      html += `<button class="gfin${g.id === t.act ? " act" : ""}" id="gf-${g.id}" ` +
-              `data-fin="${g.id}">Terminar ${g.chart || g.short}</button>`;
+      const ultimo = g.id === GROUPS[GROUPS.length - 1].id;
+      const btn = ultimo
+        ? `<button class="gfin${g.id === t.act ? " act" : ""}" id="gf-${g.id}" data-end="1">Terminar sesión</button>`
+        : `<button class="gfin${g.id === t.act ? " act" : ""}" id="gf-${g.id}" ` +
+          `data-fin="${g.id}">Terminar ${g.chart || g.short}</button>`;
+      html += ultimo
+        ? `<div class="endrow">${btn}<div class="endcount" id="progTxt"></div></div>`
+        : btn;
     }
     html += `</div>`;
   });
   listEl.innerHTML = html;
+  listEl.querySelectorAll(".card").forEach(c => refrescaAviso(c, c.dataset.card));
 
-  listEl.querySelectorAll("input").forEach(inp=>{
+  listEl.querySelectorAll(".sets input").forEach(inp=>{
     inp.addEventListener("input", ()=>{
-      const v = inp.value === "" ? "" : parseFloat(inp.value);
-      setCell(S.week, S.sess, inp.dataset.ex, inp.dataset.f, v);
+      const v  = inp.value === "" ? "" : parseFloat(inp.value);
+      const id = inp.dataset.ex;
+      setCell(S.week, S.sess, id, inp.dataset.f, v);
+      /* El peso de la serie 1 se propaga a las siguientes mientras estén vacías. */
+      if(inp.dataset.f === "w" && v !== "" && !isNaN(v)){
+        for(let sx = 1; sx < setsFor(id); sx++){
+          const k = SET_KEYS[sx][0];
+          if(cell(S.week, S.sess, id)[k] == null){
+            setCell(S.week, S.sess, id, k, v);
+            const box = document.getElementById("w-" + id + "-" + sx);
+            if(box && box.value === "") box.value = v;
+          }
+        }
+      }
       const card = inp.closest(".card");
-      const c = cell(S.week, S.sess, inp.dataset.ex);
-      const full = c.w != null && c.r != null;
+      const row  = inp.closest(".srow");
+      if(row) row.classList.toggle("ok", setDone(cell(S.week, S.sess, id), +inp.dataset.set));
+      refrescaAviso(card, id);
+      const full = exDone(id);
       card.classList.toggle("done", full);
       if(full) card.classList.remove("carried");
       const tag = card.querySelector(".carrytag");
       if(full && tag) tag.remove();
-      const strip = card.querySelector(".dayhist");
-      if(strip) strip.outerHTML = dayStrip(S.week, inp.dataset.ex);
       updateProgress(); renderDaySeg();
     });
   });
+  listEl.querySelectorAll("[data-rest]").forEach(b=>{
+    b.addEventListener("click", ()=> startSetRest(b.dataset.rest, +b.dataset.set));
+  });
   listEl.querySelectorAll("[data-fin]").forEach(b=>{
     b.addEventListener("click", ()=> finishBlock(b.dataset.fin));
+  });
+  listEl.querySelectorAll("[data-end]").forEach(b=>{
+    b.addEventListener("click", terminarSesion);
   });
   updateProgress();
   paintTimers();
@@ -1468,11 +1623,12 @@ function renderList(){
 
 function updateProgress(){
   const total = EX.length;
-  const done = EX.filter(e=>{
-    const c = cell(S.week, S.sess, e.id); return c.w != null && c.r != null;
-  }).length;
-  $("#progFill").style.width = (done/total*100).toFixed(1)+"%";
-  $("#progTxt").textContent = `${done} / ${total} · Día ${S.sess}`;
+  const done = EX.filter(e => exDone(e.id)).length;
+  const box = $("#progTxt");
+  if(box){
+    box.innerHTML = `<b>${done}</b> / ${total} <span>ejercicios</span>`;
+    box.classList.toggle("full", done === total);
+  }
 }
 
 /* ============================================================
@@ -1498,9 +1654,114 @@ const SVGNS = "http://www.w3.org/2000/svg";
    y solo la ultima serie de cada ejercicio va cerca del fallo. ---- */
 const MULTI = {squat:1, bench:1, hipthrust:1, pullup:1, cablerow:1, ohp:1};
 const FASES = [{multi:2, aisl:1}, {multi:2, aisl:2}, {multi:3, aisl:2}];
-function faseActual(){
-  const i = (parseInt(S.fase, 10) || 1) - 1;
-  return FASES[(i >= 0 && i < FASES.length) ? i : 0];
+/* Semana absoluta del programa: 4 semanas por mes. La fase sale de ahí,
+   así que no hay dos sitios donde elegir lo mismo. */
+function semanaAbs(m, w){
+  return ((m || S.month) - 1) * 4 + (w || parseInt(S.week, 10));
+}
+function faseDe(abs){ return abs <= 3 ? 0 : abs <= 6 ? 1 : 2; }
+function faseActual(){ return FASES[faseDe(semanaAbs())]; }
+function pintaProtocolo(){
+  const el2 = document.getElementById("protocolo");
+  if(!el2) return;
+  const f = faseActual();
+  el2.textContent = "Semana " + semanaAbs() + " · " + f.multi +
+    " series en multiarticulares y " + f.aisl + (f.aisl === 1 ? " en aislados" : " en aislados") +
+    " · solo la última cerca del fallo, las previas a 2 RIR · excéntrica 2–3 s";
+}
+/* Una sola lista con todas las semanas del programa. El mes se deduce de la
+   semana (4 por mes), así que no hay dos controles para lo mismo. */
+function pintaSemanas(){
+  const sel = document.getElementById("weekSel");
+  if(!sel) return;
+  let html = "";
+  for(let abs = 1; abs <= MONTHS * 4; abs++){
+    html += `<option value="${abs}">Fase ${faseDe(abs)+1} · Semana ${abs}</option>`;
+  }
+  sel.innerHTML = html;
+  sel.value = String(semanaAbs());
+}
+/* ---- Progresión doble ----------------------------------------------------
+   La hipertrofia es parecida en un abanico amplio de cargas (≥ ~30% 1RM)
+   siempre que la serie se lleve cerca del fallo, así que NO hay un rango
+   mágico de repeticiones. Lo que sí está respaldado es el método: trabajar
+   dentro de un rango y subir la carga al superar su techo.
+   El rango en sí es una decisión práctica — mantiene la carga razonablemente
+   alta (la fuerza sí depende de la carga) sin caer en series eternas.
+   El aviso mira SOLO la última serie, que es la que va cerca del fallo:
+   en una serie a 2 RIR las repeticiones no significan lo mismo.            */
+const RANGOS = {
+  squat:[6,12], bench:[6,12], hipthrust:[6,12],
+  pullup:[6,12], cablerow:[6,12], ohp:[6,12],          // multiarticulares
+  legext:[10,15], adductor:[10,15], lateral:[10,15],
+  curl:[10,15], pushdown:[10,15],                       // aislados
+  calf:[12,20], crunch:[15,25]                          // gemelos y core
+};
+const SIN_CARGA = {crunch:true};
+function rangoDe(id){ return RANGOS[id] || [8,12]; }
+function consejoCarga(id, c){
+  const n = setsFor(id), k = SET_KEYS[n-1];
+  const reps = c[k[1]], kg = c[k[0]];
+  if(reps == null || !isFinite(reps)) return null;
+  const r = rangoDe(id);
+  if(reps >= r[1]) return {d:"up",   reps:reps, kg:kg, r:r};
+  if(reps <  r[0]) return {d:"down", reps:reps, kg:kg, r:r};
+  return null;
+}
+/* La última sesión en la que ese ejercicio tuvo datos. */
+function celdaAnterior(w, d, id){
+  const cur = [S.month, w, parseInt(d, 10)];
+  const before = a => a[0] < cur[0] || (a[0] === cur[0] &&
+                 (a[1] < cur[1] || (a[1] === cur[1] && a[2] < cur[2])));
+  for(let m = S.month; m >= 1; m--)
+    for(let wk = 4; wk >= 1; wk--)
+      for(let dd = 3; dd >= 1; dd--){
+        if(!before([m, wk, dd])) continue;
+        const c = cell(wk, String(dd), id, m);
+        for(let i = SET_KEYS.length - 1; i >= 0; i--)
+          if(c[SET_KEYS[i][0]] != null && c[SET_KEYS[i][1]] != null)
+            return {kg:c[SET_KEYS[i][0]], reps:c[SET_KEYS[i][1]]};
+      }
+  return null;
+}
+/* El aviso de la sesión pasada viaja hasta la sesión en la que puedes actuar. */
+function consejoPendiente(id, w, d){
+  const a = celdaAnterior(w, d, id);
+  if(!a) return null;
+  const r = rangoDe(id);
+  if(a.reps >= r[1]) return {d:"up",   reps:a.reps, kg:a.kg, r:r};
+  if(a.reps <  r[0]) return {d:"down", reps:a.reps, kg:a.kg, r:r};
+  return null;
+}
+function hintHTML(id, c){
+  const a = consejoCarga(id, c);
+  if(!a) return "";
+  if(a.d === "up"){
+    const qué = SIN_CARGA[id] ? "Añade lastre o pasa a una variante más dura"
+                              : "Sube el peso la próxima sesión";
+    const conKg = (a.kg != null && !SIN_CARGA[id]) ? " con " + a.kg + " " + S.unit : "";
+    return '<p class="hint up">▲ ' + qué + ' · ' + a.reps + ' reps' + conKg +
+           ', techo de ' + a.r[0] + '–' + a.r[1] + '</p>';
+  }
+  return '<p class="hint down">▼ Peso alto · ' + a.reps + ' reps, por debajo de ' + a.r[0] + '</p>';
+}
+const SET_KEYS = [["w","r"],["w2","r2"],["w3","r3"]];
+function setsFor(id){ const f = faseActual(); return MULTI[id] ? f.multi : f.aisl; }
+function restFor(id){ return MULTI[id] ? 120000 : 90000; }   // 2 min multi, 90 s aislados
+function setDone(c, i){ const k = SET_KEYS[i]; return c[k[0]] != null && c[k[1]] != null; }
+function exDone(id){
+  const c = cell(S.week, S.sess, id), n = setsFor(id);
+  for(let i = 0; i < n; i++) if(!setDone(c, i)) return false;
+  return true;
+}
+function startSetRest(id, s){
+  const t = TM();
+  if(!t.run && !t.over){ t.run = true; t.last = Date.now(); }
+  t.rest = restFor(id);
+  const ex = EX.find(x => x.id === id);
+  t.restLabel = "Descanso entre series";
+  t.restNext  = ex ? ex.n + " · serie " + (s + 2) : "";
+  save(); paintTimers();
 }
 function seriesTag(id){
   const f = faseActual();
@@ -1759,13 +2020,20 @@ function drawTiles(){
   const w = S.week, d = S.sess;
   const v = weekVolume(w), pv = w>1 ? weekVolume(w-1) : 0;
   const t = TM();
-  const done = EX.filter(e=>{const c=cell(w,d,e.id); return c.w!=null&&c.r!=null;}).length;
+  const done = EX.filter(e=>{                       // completo = todas sus series
+    const c = cell(w,d,e.id), n = setsFor(e.id);
+    for(let i = 0; i < n; i++) if(!setDone(c, i)) return false;
+    return true;
+  }).length;
   let best = {n:"—", w:0};
   SESS.forEach(dd=> EX.forEach(e=>{
     const c = cell(w,dd,e.id); if(c.w && c.w > best.w) best = {n:e.n, w:c.w};
   }));
   const totalReps = SESS.reduce((n,dd)=>
-    n + EX.reduce((m,e)=> m + (cell(w,dd,e.id).r || 0), 0), 0);
+    n + EX.reduce((m,e)=>{
+      const c = cell(w,dd,e.id);
+      return m + (c.r || 0) + (c.r2 || 0) + (c.r3 || 0);   // todas las series
+    }, 0), 0);
   const wt = weekTime(w);
 
   let delta = `<p class="d flat">First week logged</p>`;
@@ -1780,7 +2048,7 @@ function drawTiles(){
 
   $("#tiles").innerHTML = `
     <div class="tile" style="grid-column:1/-1">
-      <p class="k">TOTAL VOLUME · MES ${S.month} · WEEK ${w}</p>
+      <p class="k">VOLUMEN TOTAL · SEMANA ${semanaAbs(S.month, w)}</p>
       <p class="v">${fmt(v)}<span class="u">${S.unit}</span></p>
       ${delta}
     </div>
@@ -1834,7 +2102,7 @@ $("#markToday").addEventListener("click", ()=>{ markToday(); renderStats(); });
    ============================================================ */
 $("#monthSel").innerHTML = Array.from({length:MONTHS}, (_,i)=>
   `<option value="${i+1}">Mes ${i+1}</option>`).join("");
-$("#weekSel").value = String(S.week);
+pintaSemanas();
 $("#exSel").innerHTML = GROUPS.filter(g => EX.some(e=>e.g===g.id)).map(g =>
   `<optgroup label="${g.chart || g.short}">` +
   EX.filter(e=>e.g===g.id).map(e=>`<option value="${e.id}">${e.n}</option>`).join("") +
@@ -1846,6 +2114,7 @@ $("#monthSel").addEventListener("change", e=>{
   S.month = parseInt(e.target.value,10);
   const nt = TM(); nt.run = false; nt.last = null;
   save();
+  pintaSemanas();
   renderDaySeg(); renderList();
   if(!$("#viewStats").classList.contains("hidden")) renderStats();
 });
@@ -1853,9 +2122,14 @@ $("#weekSel").addEventListener("change", e=>{
   tick();                                   // settle the week we are leaving
   const prev = TM();
   prev.run = false; prev.last = null;       // never let a week tick in the background
-  S.week = parseInt(e.target.value,10);
+  const abs = parseInt(e.target.value, 10);
+  exAqui = null;
+  S.month = Math.ceil(abs / 4);
+  S.week  = ((abs - 1) % 4) + 1;
+  $("#monthSel").value = String(S.month);
   const nt = TM(); nt.run = false; nt.last = null;
   save();
+  pintaSemanas();
   renderDaySeg();
   renderList();
   if(!$("#viewStats").classList.contains("hidden")) renderStats();
@@ -1945,7 +2219,7 @@ function boot(){
   applyTheme();
   $("#warnBar").classList.toggle("hidden", CAN_STORE);
   $("#monthSel").value = String(S.month);
-  $("#weekSel").value = String(S.week);
+  pintaSemanas();
   $("#btnUnit").textContent = "Switch to " + (S.unit === "kg" ? "lb" : "kg");
   renderDaySeg();
   renderList();
@@ -2465,12 +2739,6 @@ if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
   $("#dCampo").addEventListener("change", e=>{
     const d = dia(st.dia); d.campo = e.target.checked;
     S.dieta[st.dia] = d; save(); renderComidaV(); renderCuerpo();
-  });
-  /* selector de fase del plan de volumen */
-  $("#faseSel").value = String(S.fase || 1);
-  $("#faseSel").addEventListener("change", e=>{
-    S.fase = parseInt(e.target.value, 10) || 1;
-    save(); renderList();
   });
   $("#nAdd").addEventListener("click", ()=>{
     const nm = $("#nNom").value.trim();
