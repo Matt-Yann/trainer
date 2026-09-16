@@ -437,7 +437,22 @@
 
   /* ---------- una fila por serie ---------- */
   .sets{display:flex;flex-direction:column;gap:6px;margin-top:9px}
-  .srow{display:grid;grid-template-columns:86px minmax(0,1fr) minmax(0,1fr) 40px;
+  .pesorow{display:grid;grid-template-columns:86px minmax(0,1fr) 40px;gap:6px;
+    align-items:center;margin-bottom:6px}
+  .pesorow .plab{font-size:11.5px;font-weight:750;color:var(--muted);letter-spacing:.02em}
+  .pesorow .punit{font-size:11.5px;font-weight:700;color:var(--muted);text-align:center}
+  .pesorow input{width:100%;height:40px;border-radius:10px;border:1px solid var(--line);
+    background:var(--surface-2);color:var(--ink);font:inherit;font-size:15px;font-weight:650;
+    text-align:center;padding:0 3px;min-width:0;font-variant-numeric:tabular-nums;
+    -moz-appearance:textfield}
+  .pesorow input::-webkit-outer-spin-button,
+  .pesorow input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .pesorow input:focus{outline:none;border-color:var(--series-1);box-shadow:0 0 0 1px var(--series-1)}
+  .pesorow input.mark-up, .pesorow input.mark-up:focus{
+    border-color:var(--good);box-shadow:0 0 0 1px var(--good)}
+  .pesorow input.mark-down, .pesorow input.mark-down:focus{
+    border-color:var(--series-2);box-shadow:0 0 0 1px var(--series-2)}
+  .srow{display:grid;grid-template-columns:86px minmax(0,1fr) 40px;
     gap:6px;align-items:center}
   .srow .snum{font-size:11.5px;font-weight:750;color:var(--muted);letter-spacing:.02em;
     white-space:nowrap}
@@ -459,7 +474,7 @@
     padding:0;cursor:pointer}
   .srow .srest.ph{border:0;background:none;cursor:default}
   @media (max-width:360px){
-    .srow{grid-template-columns:76px minmax(0,1fr) minmax(0,1fr) 38px;gap:5px}
+    .srow, .pesorow{grid-template-columns:76px minmax(0,1fr) 38px;gap:5px}
     .srow .snum{font-size:10.5px}
     .srow .srest{width:38px;height:38px;font-size:17px}
   }
@@ -1122,7 +1137,7 @@ function prevField(w, d, id, field){
   }
   return null;
 }
-const vol = (c) => (c.w||0)*(c.r||0) + (c.w2||0)*(c.r2||0) + (c.w3||0)*(c.r3||0);
+const vol = (c) => (c.w || 0) * ((c.r || 0) + (c.r2 || 0) + (c.r3 || 0));
 const fmt = (n) => {
   if(!isFinite(n)) return "0";
   if(n >= 100000) return (n/1000).toFixed(0)+"k";
@@ -1250,13 +1265,13 @@ function restOver(){
 /* Turn the greyed pre-filled numbers of one block into real logged sets. */
 function commitBlock(id){
   EX.filter(e => e.g === id).forEach(e=>{
-    const n = setsFor(e.id);
-    for(let s = 0; s < n; s++){
+    const wi = document.getElementById("w-" + e.id);
+    if(!wi || wi.value === "") return;
+    for(let s = 0; s < setsFor(e.id); s++){
       if(setDone(cell(S.week, S.sess, e.id), s)) continue;
-      const wi = document.getElementById("w-" + e.id + "-" + s);
       const ri = document.getElementById("r-" + e.id + "-" + s);
-      if(!wi || !ri || wi.value === "" || ri.value === "") continue;
-      setCell(S.week, S.sess, e.id, SET_KEYS[s][0], parseFloat(wi.value));
+      if(!ri || ri.value === "") continue;
+      setCell(S.week, S.sess, e.id, "w", parseFloat(wi.value));
       setCell(S.week, S.sess, e.id, SET_KEYS[s][1], parseFloat(ri.value));
     }
   });
@@ -1266,7 +1281,7 @@ function finishBlock(id){
   const t = TM();
   markToday();
   commitBlock(id);
-  if(!t.run && t.el === 0){ t.run = true; t.last = Date.now(); }
+  arranca(t);          // sin el crono en marcha, la cuenta atrás no bajaría
   if(t.done.indexOf(id) === -1) t.done.push(id);
   const next = GROUPS.map(g=>g.id).filter(g => t.done.indexOf(g) === -1)[0] || null;
   t.act = next;
@@ -1400,6 +1415,7 @@ function paintTimers(){
   });
 
   const sheet = $("#restSheet");
+  if(t.rest > 0 && !t.run && !t.over){ arranca(t); save(); }
   if(t.rest > 0){
     sheet.classList.remove("hidden");
     if(!sheet.classList.contains("done")){
@@ -1489,7 +1505,7 @@ function refrescaAviso(card, id){
     box = document.getElementById("r-" + id + "-" + (n - 1));   // marca las repeticiones
     html = hintHTML(id, c);
   } else if(pend){
-    box = document.getElementById("w-" + id + "-0");            // marca el peso: es lo que cambias
+    box = document.getElementById("w-" + id);                   // marca el peso: es lo que cambias
     const kg = (pend.kg != null && !SIN_CARGA[id]) ? " con " + pend.kg + " " + S.unit : "";
     html = pend.d === "up"
       ? '<p class="hint up">▲ ' +
@@ -1526,25 +1542,25 @@ function renderList(){
       const pr = c.r != null ? null : prevField(w, ses, e.id, "r");
       const src = pw || pr;
       const carried = !done && !!src;
-      let rows = "";
+      /* El peso es uno para todo el ejercicio: nunca cambia entre series. */
+      const vwEx = c.w != null ? c.w : (pw ? pw.v : "");
+      let rows = `
+            <div class="pesorow">
+              <span class="plab">Peso</span>
+              <input id="w-${e.id}" type="number" inputmode="decimal" step="0.5" min="0"
+                     aria-label="Peso de ${e.n}" placeholder="—" value="${vwEx}"
+                     data-ex="${e.id}" data-f="w">
+              <span class="punit">${S.unit}</span>
+            </div>`;
       for(let sx = 0; sx < nSets; sx++){
-        const kw = SET_KEYS[sx][0], kr = SET_KEYS[sx][1];
-        let vw = c[kw] != null ? c[kw] : "";
+        const kr = SET_KEYS[sx][1];
         let vr = c[kr] != null ? c[kr] : "";
-        if(sx === 0){
-          if(vw === "" && pw) vw = pw.v;
-          if(vr === "" && pr) vr = pr.v;
-        } else if(vw === "" && c.w != null){
-          vw = c.w;                                  // mismo peso que la serie 1
-        }
+        if(sx === 0 && vr === "" && pr) vr = pr.v;
         const last  = sx === nSets - 1;
         const fallo = last && e.id !== "adductor";   // aductores nunca al fallo
         rows += `
-            <div class="srow${setDone(c, sx)?" ok":""}">
+            <div class="srow">
               <span class="snum">S${sx+1} <i class="${fallo?"fallo":""}">(${fallo?"al fallo":"2 RIR"})</i></span>
-              <input id="w-${e.id}-${sx}" type="number" inputmode="decimal" step="0.5" min="0"
-                     aria-label="Peso serie ${sx+1}" placeholder="${S.unit}" value="${vw}"
-                     data-ex="${e.id}" data-f="${kw}" data-set="${sx}">
               <input id="r-${e.id}-${sx}" type="number" inputmode="numeric" step="1" min="0"
                      aria-label="Repeticiones serie ${sx+1}" placeholder="reps" value="${vr}"
                      data-ex="${e.id}" data-f="${kr}" data-set="${sx}">
@@ -1585,17 +1601,6 @@ function renderList(){
       const v  = inp.value === "" ? "" : parseFloat(inp.value);
       const id = inp.dataset.ex;
       setCell(S.week, S.sess, id, inp.dataset.f, v);
-      /* El peso de la serie 1 se propaga a las siguientes mientras estén vacías. */
-      if(inp.dataset.f === "w" && v !== "" && !isNaN(v)){
-        for(let sx = 1; sx < setsFor(id); sx++){
-          const k = SET_KEYS[sx][0];
-          if(cell(S.week, S.sess, id)[k] == null){
-            setCell(S.week, S.sess, id, k, v);
-            const box = document.getElementById("w-" + id + "-" + sx);
-            if(box && box.value === "") box.value = v;
-          }
-        }
-      }
       const card = inp.closest(".card");
       const row  = inp.closest(".srow");
       if(row) row.classList.toggle("ok", setDone(cell(S.week, S.sess, id), +inp.dataset.set));
@@ -1700,8 +1705,8 @@ const RANGOS = {
 const SIN_CARGA = {crunch:true};
 function rangoDe(id){ return RANGOS[id] || [8,12]; }
 function consejoCarga(id, c){
-  const n = setsFor(id), k = SET_KEYS[n-1];
-  const reps = c[k[1]], kg = c[k[0]];
+  const n = setsFor(id);
+  const reps = c[SET_KEYS[n-1][1]], kg = c.w;
   if(reps == null || !isFinite(reps)) return null;
   const r = rangoDe(id);
   if(reps >= r[1]) return {d:"up",   reps:reps, kg:kg, r:r};
@@ -1718,9 +1723,9 @@ function celdaAnterior(w, d, id){
       for(let dd = 3; dd >= 1; dd--){
         if(!before([m, wk, dd])) continue;
         const c = cell(wk, String(dd), id, m);
+        if(c.w == null) continue;
         for(let i = SET_KEYS.length - 1; i >= 0; i--)
-          if(c[SET_KEYS[i][0]] != null && c[SET_KEYS[i][1]] != null)
-            return {kg:c[SET_KEYS[i][0]], reps:c[SET_KEYS[i][1]]};
+          if(c[SET_KEYS[i][1]] != null) return {kg:c.w, reps:c[SET_KEYS[i][1]]};
       }
   return null;
 }
@@ -1748,15 +1753,20 @@ function hintHTML(id, c){
 const SET_KEYS = [["w","r"],["w2","r2"],["w3","r3"]];
 function setsFor(id){ const f = faseActual(); return MULTI[id] ? f.multi : f.aisl; }
 function restFor(id){ return MULTI[id] ? 120000 : 90000; }   // 2 min multi, 90 s aislados
-function setDone(c, i){ const k = SET_KEYS[i]; return c[k[0]] != null && c[k[1]] != null; }
+function setDone(c, i){ return c.w != null && c[SET_KEYS[i][1]] != null; }
 function exDone(id){
   const c = cell(S.week, S.sess, id), n = setsFor(id);
   for(let i = 0; i < n; i++) if(!setDone(c, i)) return false;
   return true;
 }
+/* La cuenta atrás del descanso solo baja mientras el cronómetro corre, así que
+   cualquier cosa que abra un descanso tiene que asegurarse de arrancarlo. */
+function arranca(t){
+  if(!t.run && !t.over){ t.run = true; t.last = Date.now(); }
+}
 function startSetRest(id, s){
   const t = TM();
-  if(!t.run && !t.over){ t.run = true; t.last = Date.now(); }
+  arranca(t);
   t.rest = restFor(id);
   const ex = EX.find(x => x.id === id);
   t.restLabel = "Descanso entre series";
