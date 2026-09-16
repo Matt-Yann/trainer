@@ -1266,12 +1266,13 @@ function restOver(){
 function commitBlock(id){
   EX.filter(e => e.g === id).forEach(e=>{
     const wi = document.getElementById("w-" + e.id);
-    if(!wi || wi.value === "") return;
+    if(!wi) return;
+    if(wi.value === "" && !SIN_CARGA[e.id]) return;
     for(let s = 0; s < setsFor(e.id); s++){
-      if(setDone(cell(S.week, S.sess, e.id), s)) continue;
+      if(setDone(e.id, cell(S.week, S.sess, e.id), s)) continue;
       const ri = document.getElementById("r-" + e.id + "-" + s);
       if(!ri || ri.value === "") continue;
-      setCell(S.week, S.sess, e.id, "w", parseFloat(wi.value));
+      if(wi.value !== "") setCell(S.week, S.sess, e.id, "w", parseFloat(wi.value));
       setCell(S.week, S.sess, e.id, SET_KEYS[s][1], parseFloat(ri.value));
     }
   });
@@ -1312,7 +1313,8 @@ function cierraSesion(){
 }
 function terminarSesion(){
   const total  = EX.length;
-  const hechos = EX.filter(e => exDone(e.id)).length;
+  GROUPS.forEach(g => commitBlock(g.id));      // lo visible pasa a estar guardado
+  const hechos = EX.filter(e => exDoneVista(e.id)).length;
   if(hechos >= total){ cierraSesion(); return; }
   ask("La sesión no está completa",
       "Llevas " + hechos + " de " + total + " ejercicios registrados. " +
@@ -1601,9 +1603,18 @@ function renderList(){
       const v  = inp.value === "" ? "" : parseFloat(inp.value);
       const id = inp.dataset.ex;
       setCell(S.week, S.sess, id, inp.dataset.f, v);
+      /* El peso copiado de la sesión anterior es solo una sugerencia hasta que se
+         toca. Al anotar repeticiones queda confirmado, así que se guarda. */
+      if(inp.dataset.f !== "w"){
+        const wbox = document.getElementById("w-" + id);
+        if(wbox && wbox.value !== "" && cell(S.week, S.sess, id).w == null && !SIN_CARGA[id]){
+          const wv = parseFloat(wbox.value);
+          if(!isNaN(wv)) setCell(S.week, S.sess, id, "w", wv);
+        }
+      }
       const card = inp.closest(".card");
       const row  = inp.closest(".srow");
-      if(row) row.classList.toggle("ok", setDone(cell(S.week, S.sess, id), +inp.dataset.set));
+      if(row) row.classList.toggle("ok", setDone(id, cell(S.week, S.sess, id), +inp.dataset.set));
       refrescaAviso(card, id);
       const full = exDone(id);
       card.classList.toggle("done", full);
@@ -1628,7 +1639,7 @@ function renderList(){
 
 function updateProgress(){
   const total = EX.length;
-  const done = EX.filter(e => exDone(e.id)).length;
+  const done = EX.filter(e => exDoneVista(e.id)).length;
   const box = $("#progTxt");
   if(box){
     box.innerHTML = `<b>${done}</b> / ${total} <span>ejercicios</span>`;
@@ -1753,10 +1764,26 @@ function hintHTML(id, c){
 const SET_KEYS = [["w","r"],["w2","r2"],["w3","r3"]];
 function setsFor(id){ const f = faseActual(); return MULTI[id] ? f.multi : f.aisl; }
 function restFor(id){ return MULTI[id] ? 120000 : 90000; }   // 2 min multi, 90 s aislados
-function setDone(c, i){ return c.w != null && c[SET_KEYS[i][1]] != null; }
+function setDone(id, c, i){
+  const pesoOK = SIN_CARGA[id] || c.w != null;      // el crunch va con tu peso
+  return pesoOK && c[SET_KEYS[i][1]] != null;
+}
+/* Lo que se ve en pantalla cuenta: un número copiado de la sesión anterior que
+   dejas tal cual significa "hice lo mismo". Si la ficha no está pintada (otro
+   día, otra semana) se mira el dato guardado. */
+function exDoneVista(id){
+  const wbox = document.getElementById("w-" + id);
+  if(!wbox) return exDone(id);
+  if(!SIN_CARGA[id] && wbox.value === "") return false;
+  for(let i = 0; i < setsFor(id); i++){
+    const r = document.getElementById("r-" + id + "-" + i);
+    if(!r || r.value === "") return false;
+  }
+  return true;
+}
 function exDone(id){
   const c = cell(S.week, S.sess, id), n = setsFor(id);
-  for(let i = 0; i < n; i++) if(!setDone(c, i)) return false;
+  for(let i = 0; i < n; i++) if(!setDone(id, c, i)) return false;
   return true;
 }
 /* La cuenta atrás del descanso solo baja mientras el cronómetro corre, así que
@@ -2032,7 +2059,7 @@ function drawTiles(){
   const t = TM();
   const done = EX.filter(e=>{                       // completo = todas sus series
     const c = cell(w,d,e.id), n = setsFor(e.id);
-    for(let i = 0; i < n; i++) if(!setDone(c, i)) return false;
+    for(let i = 0; i < n; i++) if(!setDone(e.id, c, i)) return false;
     return true;
   }).length;
   let best = {n:"—", w:0};
